@@ -23,7 +23,7 @@ module Relaxo
 		module VERSION
 			MAJOR = 0
 			MINOR = 3
-			TINY  = 0
+			TINY  = 6
 
 			STRING = [MAJOR, MINOR, TINY].join('.')
 		end

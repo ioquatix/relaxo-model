@@ -18,17 +18,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'money'
+require 'latinum/resource'
 
 module Relaxo
-	module Properties
-		Attribute.for_class(Money) do
-			def convert_to_document(value)
-				[value.cents, value.currency.to_s]
-			end
+	module Model
+		module Properties
+			Attribute.for_class(Latinum::Resource) do
+				def convert_to_primative(value)
+					[value.amount.to_s('F'), value.name]
+				end
 
-			def convert_from_document(database, value)
-				Money.new(value[0], value[1])
+				def convert_from_primative(database, value)
+					if Array === value
+						@klass.new(value[0], value[1])
+					else
+						@klass.parse(value)
+					end
+				end
 			end
 		end
 	end

@@ -18,26 +18,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'relaxo/model/recordset'
+
 module Relaxo
 	module Model
-		module ClassMethods
-			DEFAULT_VIEW_OPTIONS = {:include_docs => true}
-			
+		module Base
 			def self.extended(child)
+				# $stderr.puts "#{self} extended -> #{child} (setup Base)"
 				child.instance_variable_set(:@properties, {})
 				child.instance_variable_set(:@relationships, {})
-				
+
 				default_type = child.name.split('::').last.gsub(/(.)([A-Z])/,'\1_\2').downcase!
 				child.instance_variable_set(:@type, default_type)
 			end
-			
+
 			def metaclass
 				class << self; self; end
 			end
-			
+
+			attr :type
 			attr :properties
 			attr :relationships
-			
+
+			DEFAULT_VIEW_OPTIONS = {:include_docs => true}
+
 			def view(name, path, *args)
 				options = Hash === args.last ? args.pop : DEFAULT_VIEW_OPTIONS
 				klass = args.pop || options[:class]
@@ -48,20 +52,52 @@ module Relaxo
 				end
 			end
 
-			def relationship(name, path, *args)
-				options = Hash === args.last ? args.pop : {}
-				klass = args.pop || options[:class]
+			DEFAULT_RELATIONSHIP_OPTIONS = {
+				:key => lambda {|object, query| query[:key] = object.id},
+				:include_docs => true
+			}
+
+			def relationship(name, path, *args, &block)
+				options = Hash === args.last ? args.pop : DEFAULT_RELATIONSHIP_OPTIONS
+				klass = block || args.pop || options[:class]
 
 				@relationships[name] = options
+
+				# This reduction returns a single result, so just provide the first row directly:
+				reduction = options.delete(:reduction)
+
+				# Specify a composite key, e.g. :key => :self or :key => [:self]
+				if key = options[:key]
+					options = options.dup
+					
+					if key == :self
+						options[:key] = lambda do |object, query|
+							query[:key] = object.id
+						end
+					elsif Array === key
+						index = key.index(:self)
+						
+						options[:key] = lambda do |object, query|
+							query[:key] = key.dup
+							query[:key][index] = object.id
+						end
+					end
+				end
 
 				self.send(:define_method, name) do |query = {}|
 					query = query.merge(options)
 
-					unless query.include? :key
-						query[:key] = self.id
+					if options[:key].respond_to? :call
+						options[:key].call(self, query)
 					end
 
-					Recordset.new(@database, @database.view(path, query), klass)
+					recordset = Recordset.new(@database, @database.view(path, query), klass)
+
+					if reduction == :first
+						recordset.first
+					else
+						recordset
+					end
 				end
 			end
 
@@ -73,11 +109,13 @@ module Relaxo
 				self.send(:define_method, name) do
 					if @changed.include? name
 						return @changed[name]
-					elsif @document.include? name
+					elsif @attributes.include? name
 						if klass
-							@changed[name] = klass.convert_from_document(@database, @document[name])
+							value = @attributes[name]
+
+							@changed[name] = klass.convert_from_primative(@database, value)
 						else
-							@changed[name] = @document[name]
+							@changed[name] = @attributes[name]
 						end
 					else
 						nil
@@ -87,125 +125,18 @@ module Relaxo
 				self.send(:define_method, "#{name}=") do |value|
 					@changed[name] = value
 				end
-			end
-			
-			def create(database, properties)
-				instance = self.new(database, {'type' => @type})
-
-				properties.each do |key, value|
-					instance[key] = value
-				end
-
-				instance.after_create
-
-				return instance
-			end
-			
-			def fetch(database, id)
-				instance = self.new(database, database.get(id).to_hash)
-
-				instance.after_fetch
-
-				return instance
-			end
-		end
-		
-		module Base
-			def initialize(database, document = {})
-				# Raw key-value database
-				@document = document
-				@database = database
-				@changed = {}
-			end
-
-			attr :database
-
-			def id
-				@document[ID]
-			end
-
-			def rev
-				@document[REV]
-			end
-
-			def clear(key)
-				@changed.delete(key)
-				@document.delete(key)
-			end
-
-			def [] name
-				name = name.to_s
-
-				if self.class.properties.include? name
-					self.send(name)
-				else
-					raise KeyError.new(name)
-				end
-			end
-
-			def []= name, value
-				name = name.to_s
-
-				if self.class.properties.include? name
-					self.send("#{name}=", value)
-				else
-					raise KeyError.new(name)
-				end
-			end
-
-			# Update any calculations:
-			def before_save
-			end
-
-			def after_save
-			end
-
-			def save
-				before_save
-
-				return if @changed.size == 0 && self.id
-
-				# Flatten changed properties:
-				self.class.properties.each do |key, klass|
-					if @changed.include? key
-						if klass
-							@document[key] = klass.convert_to_document(@changed.delete(key))
-						else
-							@document[key] = @changed.delete(key)
-						end
+				
+				self.send(:define_method, "#{name}?") do
+					value = self.send(name)
+					
+					if value == nil || value == false
+						false
+					elsif value.respond_to? :empty?
+						!value.empty?
+					else
+						true
 					end
 				end
-
-				# Non-specific properties, serialised by JSON:
-				@changed.each do |key, value|
-					@document[key] = value
-				end
-
-				@changed = {}
-				@database.save(@document)
-
-				after_save
-			end
-
-			def before_delete
-			end
-
-			def after_delete
-			end
-
-			def delete
-				before_delete
-
-				@database.delete(@document)
-
-				after_delete
-			end
-
-			def after_fetch
-			end
-
-			# Set any default values:
-			def after_create
 			end
 		end
 	end

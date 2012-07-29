@@ -1,3 +1,4 @@
+
 # Copyright (c) 2012 Samuel G. D. Williams. <http://www.oriontransfer.co.nz>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,20 +19,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'relaxo'
-
-require 'relaxo/model/document'
-require 'relaxo/model/properties'
-require 'relaxo/model/recordset'
-
 module Relaxo
 	module Model
-		def self.included(child)
-			# Include all available properties
-
-			# $stderr.puts "#{self} included -> #{child} include Properties, Document"
-			child.send(:include, Relaxo::Model::Properties)
-			child.send(:include, Relaxo::Model::Document)
+		class Recordset
+			include Enumerable
+		
+			def initialize(database, view, klass = nil)
+				@database = database
+				@view = view
+			
+				@klass = klass
+			end
+		
+			attr :klass
+			attr :database
+		
+			def count
+				@view["total_rows"]
+			end
+		
+			def offset
+				@view["offset"]
+			end
+		
+			def rows
+				@view["rows"]
+			end
+		
+			def each(klass = nil, &block)
+				klass ||= @klass
+				
+				if klass
+					if klass.respond_to? :call
+						rows.each do |row|
+							yield klass.call(@database, row)
+						end
+					else
+						rows.each do |row|
+							# If user specified :include_docs => true, row['doc'] contains the primary value:
+							yield klass.new(@database, row['doc'] || row['value'])
+						end
+					end
+				else
+					rows.each &block
+				end
+			end
 		end
 	end
 end

@@ -1,4 +1,3 @@
-
 # Copyright (c) 2012 Samuel G. D. Williams. <http://www.oriontransfer.co.nz>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,42 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require 'bigdecimal'
+
 module Relaxo
-	class Recordset
-		include Enumerable
-		
-		def initialize(database, view, klass = nil)
-			@database = database
-			@view = view
-			
-			@klass = klass
-		end
-		
-		attr :klass
-		attr :database
-		
-		def count
-			@view["total_rows"]
-		end
-		
-		def offset
-			@view["offset"]
-		end
-		
-		def rows
-			@view["rows"]
-		end
-		
-		def each(klass = nil, &block)
-			klass ||= @klass
-			
-			if klass
-				rows.each do |row|
-					# If user specified :include_docs => true, row['doc'] contains the primary value:
-					yield klass.new(@database, row['doc'] || row['value'])
+	module Model
+		module Properties
+			Attribute.for_class(BigDecimal) do
+				def convert_to_primative(value)
+					value.to_s('F')
 				end
-			else
-				rows.each &block
+
+				def convert_from_primative(database, value)
+					value.to_d
+				end
 			end
 		end
 	end

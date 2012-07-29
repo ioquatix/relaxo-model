@@ -18,20 +18,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'relaxo'
-
-require 'relaxo/model/document'
-require 'relaxo/model/properties'
-require 'relaxo/model/recordset'
-
-module Relaxo
-	module Model
-		def self.included(child)
-			# Include all available properties
-
-			# $stderr.puts "#{self} included -> #{child} include Properties, Document"
-			child.send(:include, Relaxo::Model::Properties)
-			child.send(:include, Relaxo::Model::Document)
-		end
-	end
-end
+require 'relaxo/model/properties/attribute'
+require 'relaxo/model/properties/composite'
