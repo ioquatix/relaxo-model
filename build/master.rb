@@ -13,7 +13,6 @@ Dir.chdir("../") do
 		s.files = FileList["{bin,lib,test}/**/*"] + ["README.md"]
 
 		s.add_dependency("relaxo")
-		s.add_dependency("money")
 
 		s.has_rdoc = "yard"
 	end
