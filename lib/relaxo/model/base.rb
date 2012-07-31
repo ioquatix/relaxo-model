@@ -66,29 +66,19 @@ module Relaxo
 				# This reduction returns a single result, so just provide the first row directly:
 				reduction = options.delete(:reduction)
 
-				# Specify a composite key, e.g. :key => :self or :key => [:self]
-				if key = options[:key]
-					options = options.dup
-					
-					if key == :self
-						options[:key] = lambda do |object, query|
-							query[:key] = object.id
-						end
-					elsif Array === key
-						index = key.index(:self)
-						
-						options[:key] = lambda do |object, query|
-							query[:key] = key.dup
-							query[:key][index] = object.id
-						end
-					end
-				end
+				options = options.dup
+
+				update_key_function(options, :key)
+				update_key_function(options, :startkey)
+				update_key_function(options, :endkey)
 
 				self.send(:define_method, name) do |query = {}|
 					query = query.merge(options)
 
-					if options[:key].respond_to? :call
-						options[:key].call(self, query)
+					[:key, :startkey, :endkey].each do |name|
+						if options[name].respond_to? :call
+							options[name].call(self, query)
+						end
 					end
 
 					recordset = Recordset.new(@database, @database.view(path, query), klass)
@@ -135,6 +125,26 @@ module Relaxo
 						!value.empty?
 					else
 						true
+					end
+				end
+			end
+			
+			private
+
+			# Used for generating key functions for relationships - subject to change so private for now.
+			def update_key_function(options, name)
+				key = options[name]
+				
+				if key == :self
+					options[name] = lambda do |object, query|
+						query[name] = object.id
+					end
+				elsif Array === key
+					index = key.index(:self)
+					
+					options[name] = lambda do |object, query|
+						query[name] = key.dup
+						query[name][index] = object.id
 					end
 				end
 			end
