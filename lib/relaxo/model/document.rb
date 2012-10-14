@@ -98,7 +98,7 @@ module Relaxo
 			def after_save
 			end
 
-			# Reconnect this document with a new database session, typically used for updating an existing model within a session. Changes to the original object may be lost.
+			# Reconnect this document with a new database, typically used for updating an existing model within a session. Changes to the original object may be lost.
 			def attach(database)
 				clone = self.class.new(database, @attributes.dup)
 				

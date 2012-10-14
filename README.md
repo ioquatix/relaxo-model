@@ -7,6 +7,8 @@ Relaxo Model
 
 Relaxo Model provides a framework for business logic on top of Relaxo/CouchDB. While it supports some traditional ORM style patterns, it is primary focus is to model business processes and logic.
 
+* This framework is pretty experimental right now and subject to change. Incompatible changes will be marked by the version number `x.y.z`, where changes in `x` indiciate fundamental API changes and changes in `y` indicate minor changes or additions that shouldn't cause breakage. *
+
 Basic Usage
 -----------
 
@@ -15,9 +17,9 @@ Here is a simple example of a traditional ORM style model:
 	require 'relaxo'
 	require 'relaxo/model'
 
-	$database = Relaxo.connect("http://localhost:5984/test")
+	database = Relaxo.connect("http://localhost:5984/test")
 
-	$trees = [
+	trees = [
 		{:name => 'Hinoki', :planted => Date.parse("1948/4/2")},
 		{:name => 'Rimu', :planted => Date.parse("1962/8/7")}
 	]
@@ -32,13 +34,13 @@ Here is a simple example of a traditional ORM style model:
 		view :all, 'catalog/tree', Tree
 	end
 
-	$trees.each do |doc|
-		tree = Tree.create($database, doc)
+	trees.each do |doc|
+		tree = Tree.create(database, doc)
 	
 		tree.save
 	end
 
-	Tree.all($database).each do |tree|
+	Tree.all(database).each do |tree|
 		puts "A #{tree.name} was planted on #{tree.planted.to_s}."
 
 		# Expected output:
