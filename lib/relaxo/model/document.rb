@@ -84,6 +84,10 @@ module Relaxo
 				@attributes.key? ID
 			end
 
+			def changed? key
+				@changed.include? key.to_s
+			end
+
 			def rev
 				@attributes[REV]
 			end
