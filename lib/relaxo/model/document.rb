@@ -40,12 +40,12 @@ module Relaxo
 			TYPE = 'type'
 			
 			def self.included(child)
-				# $stderr.puts "#{self} included -> #{child} extend ClassMethods"
 				child.send(:include, Component)
 				child.send(:extend, ClassMethods)
 			end
 			
 			module ClassMethods
+				# Create a new document with a particular specified type.
 				def create(database, properties = nil)
 					instance = self.new(database, {TYPE => @type})
 
@@ -60,6 +60,7 @@ module Relaxo
 					return instance
 				end
 
+				# Fetch a record or create a model object from a hash of attributes.
 				def fetch(database, id_or_attributes)
 					if Hash === id_or_attributes
 						instance = self.new(database, id_or_attributes)
@@ -107,6 +108,7 @@ module Relaxo
 				return clone
 			end
 
+			# Save the model object, raises `ValidationErrors` if there are validation errors.
 			def save
 				before_save
 

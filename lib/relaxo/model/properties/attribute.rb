@@ -23,6 +23,7 @@ require 'date'
 module Relaxo
 	module Model
 		module Properties
+			# Handle conversions for standard datatypes.
 			class Attribute
 				@@attributes = {}
 
