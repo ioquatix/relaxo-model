@@ -20,12 +20,6 @@
 
 module Relaxo
 	module Model
-		module VERSION
-			MAJOR = 0
-			MINOR = 4
-			TINY  = 0
-
-			STRING = [MAJOR, MINOR, TINY].join('.')
-		end
+		VERSION = "0.4.0"
 	end
 end
