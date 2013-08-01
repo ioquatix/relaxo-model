@@ -1,16 +1,8 @@
-Relaxo Model
-============
-
-* Author: Samuel G. D. Williams (<http://www.oriontransfer.co.nz>)
-* Copyright (C) 2010, 2011 Samuel G. D. Williams.
-* Released under the MIT license.
+# Relaxo Model
 
 Relaxo Model provides a framework for business logic on top of Relaxo/CouchDB. While it supports some traditional ORM style patterns, it is primary focus is to model business processes and logic.
 
-* This framework is pretty experimental right now and subject to change. Incompatible changes will be marked by the version number `x.y.z`, where changes in `x` indiciate fundamental API changes and changes in `y` indicate minor changes or additions that shouldn't cause breakage. *
-
-Basic Usage
------------
+## Basic Usage
 
 Here is a simple example of a traditional ORM style model:
 
@@ -67,10 +59,19 @@ If the design document was saved as `catalog.yaml`, you could load it using rela
 
 	relaxo test catalog.yaml 
 
-License
--------
+## Contributing
 
-Copyright (c) 2010, 2011 Samuel G. D. Williams. <http://www.oriontransfer.co.nz>
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+## License
+
+Released under the MIT license.
+
+Copyright, 2010-2013, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
