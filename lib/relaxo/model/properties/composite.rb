@@ -100,7 +100,7 @@ module Relaxo
 			class HasMany < HasOne
 				def convert_to_primative(value)
 					value.each do |document|
-						document.save unless value.id
+						document.save unless document.saved?
 					end
 				
 					value.collect{|document| document.id}
