@@ -33,9 +33,10 @@ module Relaxo
 		
 			attr :klass
 			attr :database
-		
+			attr :view
+			
 			def count
-				@view["total_rows"]
+				rows.count
 			end
 		
 			def offset
