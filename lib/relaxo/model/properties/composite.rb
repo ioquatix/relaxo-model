@@ -73,7 +73,7 @@ module Relaxo
 					if klasses.size == 1
 						self.new(klasses[0])
 					else
-						Polymorphic.new(*klasses)
+						Polymorphic.new(klasses)
 					end
 				end
 			
