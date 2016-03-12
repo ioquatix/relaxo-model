@@ -119,7 +119,7 @@ module Relaxo
 				self.send(:define_method, "#{name}?") do
 					value = self.send(name)
 					
-					if value.nil? or value == false
+					if value.nil? or !value
 						false
 					elsif value.respond_to? :empty?
 						!value.empty?
