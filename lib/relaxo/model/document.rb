@@ -22,20 +22,6 @@ require 'relaxo/model/component'
 
 module Relaxo
 	module Model
-		class ValidationErrors < StandardError
-			def self.message_for_errors(errors)
-				errors.map{|error| "#{error.key} (#{error.exception.message})"}.join(', ')
-			end
-			
-			def initialize(errors)
-				super "Model validation errors occurred: #{self.class.message_for_errors(errors)}"
-				
-				@errors = errors
-			end
-			
-			attr :errors
-		end
-		
 		module Document
 			TYPE = 'type'
 			
@@ -112,12 +98,17 @@ module Relaxo
 				return clone
 			end
 
-			# Save the model object, raises `ValidationErrors` if there are validation errors.
+			# Save the model object.
 			def save
+				return if @changed.empty?
+				
 				before_save
 
-				errors = self.flatten!
-				raise ValidationErrors.new(errors) if errors.size > 0
+				if errors = self.validate
+					return errors
+				end
+				
+				self.flatten!
 
 				@database.save(@attributes)
 
@@ -148,6 +139,10 @@ module Relaxo
 			# Equality is done only on id
 			def <=> other
 				self.id <=> other.id
+			end
+			
+			def empty?
+				@attributes.empty?
 			end
 		end
 	end

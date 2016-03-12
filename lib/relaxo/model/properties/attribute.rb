@@ -53,16 +53,14 @@ module Relaxo
 				
 				def initialize(klass, &serialization)
 					@klass = klass
-					
-					raise ArgumentError.new("Klass doesn't respond to parse!") unless @klass.respond_to? :parse
 				end
 				
 				def convert_to_primative(value)
-					value.to_s
+					@klass.dump(value)
 				end
 				
 				def convert_from_primative(database, value)
-					@klass.parse(value)
+					@klass.load(value)
 				end
 			end
 		
@@ -78,7 +76,7 @@ module Relaxo
 				end
 			
 				def convert_to_primative(value)
-					if value == nil || value == ''
+					if value.nil? or value.empty?
 						nil
 					else
 						@klass.convert_to_primative(value)
@@ -86,7 +84,7 @@ module Relaxo
 				end
 
 				def convert_from_primative(database, value)
-					if value == nil || value.empty?
+					if value.nil? or value.empty?
 						nil
 					else
 						@klass.convert_from_primative(database, value)

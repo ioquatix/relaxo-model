@@ -22,16 +22,6 @@ require 'relaxo/model/base'
 
 module Relaxo
 	module Model
-		class Error
-			def initialize(key, exception)
-				@key = key
-				@exception = exception
-			end
-			
-			attr :key
-			attr :exception
-		end
-		
 		module Component
 			def self.included(child)
 				# $stderr.puts "#{self} included -> #{child} extend Base"
@@ -97,18 +87,16 @@ module Relaxo
 				end
 			end
 
-			def flatten!
-				errors = []
+			def validate
+				# Do nothing :)
+			end
 
+			def flatten!
 				# Flatten changed properties:
 				self.class.properties.each do |key, klass|
 					if @changed.include? key
 						if klass
-							begin
-								@attributes[key] = klass.convert_to_primative(@changed.delete(key))
-							rescue StandardError => error
-								errors << Error.new(key, error)
-							end
+							@attributes[key] = klass.convert_to_primative(@changed.delete(key))
 						else
 							@attributes[key] = @changed.delete(key)
 						end
@@ -121,8 +109,6 @@ module Relaxo
 				end
 
 				@changed = {}
-
-				errors
 			end
 			
 			def to_hash
