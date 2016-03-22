@@ -74,9 +74,9 @@ module Relaxo
 				def initialize(klass)
 					@klass = klass
 				end
-			
+				
 				def convert_to_primative(value)
-					if value.nil? or value.empty?
+					if value.nil? or (value.respond_to?(:empty?) and value.empty?)
 						nil
 					else
 						@klass.convert_to_primative(value)
