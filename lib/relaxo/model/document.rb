@@ -100,7 +100,7 @@ module Relaxo
 
 			# Save the model object.
 			def save
-				return if @changed.empty?
+				return if saved? and @changed.empty?
 				
 				before_save
 
