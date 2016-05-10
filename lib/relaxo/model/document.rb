@@ -22,6 +22,18 @@ require 'relaxo/model/component'
 
 module Relaxo
 	module Model
+		class ValidationError < StandardError
+			def initialize(document, errors)
+				@document = document
+				@errors = errors
+				
+				super "Failed to validate document #{@document} because: #{@errors.join(', ')}!"
+			end
+			
+			attr :document
+			attr :errors
+		end
+		
 		module Document
 			TYPE = 'type'
 			
@@ -113,6 +125,18 @@ module Relaxo
 				@database.save(@attributes)
 
 				after_save
+				
+				return true
+			end
+
+			def save!
+				result = self.save
+				
+				if result != true
+					throw ValidationErrors.new(result)
+				end
+				
+				return self
 			end
 
 			def before_delete
