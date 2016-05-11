@@ -65,6 +65,8 @@ module Relaxo
 
 					self[key] = value
 				end
+				
+				return self
 			end
 
 			def [] name
