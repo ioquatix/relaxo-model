@@ -34,6 +34,16 @@ module Relaxo
 			attr :errors
 		end
 		
+		class TypeError < StandardError
+			def initialize(document)
+				@document = document
+				
+				super "Expected type #{@document.class.type} but got #{@document.type}!"
+			end
+			
+			attr :document
+		end
+		
 		module Document
 			TYPE = 'type'
 			
@@ -92,6 +102,10 @@ module Relaxo
 
 			def type
 				@attributes[TYPE]
+			end
+
+			def valid_type?
+				self.type == @@type
 			end
 
 			# Update any calculations:
@@ -154,6 +168,7 @@ module Relaxo
 			end
 
 			def after_fetch
+				raise TypeError.new(self) unless valid_type?
 			end
 
 			# Set any default values:

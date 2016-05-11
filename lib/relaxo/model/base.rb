@@ -32,6 +32,8 @@ module Relaxo
 				child.instance_variable_set(:@type, default_type)
 			end
 
+			attr :type
+
 			def metaclass
 				class << self; self; end
 			end
