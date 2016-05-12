@@ -105,7 +105,7 @@ module Relaxo
 			end
 
 			def valid_type?
-				self.type == @@type
+				self.type == self.class.type
 			end
 
 			# Update any calculations:
