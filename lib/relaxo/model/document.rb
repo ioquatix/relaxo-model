@@ -184,7 +184,7 @@ module Relaxo
 			
 			# Equality is done only on id
 			def <=> other
-				self.id <=> other.id
+				self.id <=> other.id if other
 			end
 			
 			def empty?
