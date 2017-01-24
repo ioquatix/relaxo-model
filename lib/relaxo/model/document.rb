@@ -87,11 +87,18 @@ module Relaxo
 			def id
 				@attributes[ID]
 			end
-
+			
+			# A string suitable for use as a URL parameter.
+			alias to_param id
+			
+			def new_record?
+				!saved?
+			end
+			
 			def saved?
 				@attributes.key? ID
 			end
-
+			
 			def changed? key
 				@changed.include? key.to_s
 			end
