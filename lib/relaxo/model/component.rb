@@ -28,15 +28,14 @@ module Relaxo
 				child.send(:extend, Base)
 			end
 			
-			def initialize(database, attributes = {})
-				# Raw key-value database
+			def initialize(dataset, attributes = {})
 				@attributes = attributes
-				@database = database
+				@dataset = dataset
 				@changed = {}
 			end
 
 			attr :attributes
-			attr :database
+			attr :dataset
 			attr :changed
 
 			def clear(key)
@@ -60,7 +59,7 @@ module Relaxo
 
 					if klass
 						# This might raise a validation error
-						value = klass.convert_from_primative(@database, value)
+						value = klass.convert_from_primative(@dataset, value)
 					end
 
 					self[key] = value
@@ -96,16 +95,18 @@ module Relaxo
 			def flatten!
 				# Flatten changed properties:
 				self.class.properties.each do |key, klass|
-					if @changed.include? key
+					if @changed.include?(key)
 						if klass
 							@attributes[key] = klass.convert_to_primative(@changed.delete(key))
 						else
 							@attributes[key] = @changed.delete(key)
 						end
+					elsif default = klass.default and !@attributes.include?(key)
+						@attributes[key] = default
 					end
 				end
 
-				# Non-specific properties, serialised by JSON:
+				# Non-specific properties:
 				@changed.each do |key, value|
 					@attributes[key] = value
 				end

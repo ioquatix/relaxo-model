@@ -52,7 +52,7 @@ module Relaxo
 					[object.type, object.id]
 				end
 
-				def convert_from_primative(database, reference)
+				def convert_from_primative(dataset, reference)
 					# Legacy support for old polymorphic types - to remove.
 					if Array === reference
 						type, id = reference
@@ -60,11 +60,11 @@ module Relaxo
 						id = reference
 					end
 					
-					attributes = database.get(id).to_hash
+					attributes = dataset.get(id).to_hash
 					
 					klass = lookup(attributes['type'])
 					
-					klass.fetch(database, attributes)
+					klass.fetch(dataset, attributes)
 				end
 			end
 
@@ -89,8 +89,8 @@ module Relaxo
 					object.id
 				end
 
-				def convert_from_primative(database, id)
-					@klass.fetch(database, id)
+				def convert_from_primative(dataset, id)
+					@klass.fetch(dataset, id)
 				end
 			end
 		
@@ -106,14 +106,14 @@ module Relaxo
 					value.collect{|document| document.id}
 				end
 
-				def convert_from_primative(database, value)
-					value.collect{|id| @klass.fetch(database, id)}
+				def convert_from_primative(dataset, value)
+					value.collect{|id| @klass.fetch(dataset, id)}
 				end
 			end
 			
 			# Returns the raw value, typically used for reductions:
 			module ValueOf
-				def self.new(database, value)
+				def self.new(dataset, value)
 					value
 				end
 			end
@@ -133,9 +133,9 @@ module Relaxo
 					end
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					value.collect do |item|
-						@klass.convert_from_primative(database, item)
+						@klass.convert_from_primative(dataset, item)
 					end
 				end
 			end

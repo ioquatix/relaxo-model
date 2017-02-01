@@ -20,6 +20,8 @@
 
 require 'relaxo/model/component'
 
+require 'msgpack'
+
 module Relaxo
 	module Model
 		class ValidationError < StandardError
@@ -45,7 +47,7 @@ module Relaxo
 		end
 		
 		module Document
-			TYPE = 'type'
+			TYPE = 'type'.freeze
 			
 			def self.included(child)
 				child.send(:include, Component)
@@ -54,8 +56,8 @@ module Relaxo
 			
 			module ClassMethods
 				# Create a new document with a particular specified type.
-				def create(database, properties = nil)
-					instance = self.new(database, {TYPE => @type})
+				def create(dataset, properties = nil)
+					instance = self.new(dataset, {TYPE => @type})
 
 					if properties
 						properties.each do |key, value|
@@ -69,42 +71,40 @@ module Relaxo
 				end
 
 				# Fetch a record or create a model object from a hash of attributes.
-				def fetch(database, id_or_attributes)
+				def fetch(dataset, id_or_attributes)
 					if Hash === id_or_attributes
-						instance = self.new(database, id_or_attributes)
+						instance = self.new(dataset, id_or_attributes)
 					else
-						instance = self.new(database, database.get(id_or_attributes).to_hash)
+						data = dataset.read(id_or_attributes)
+						instance = self.new(dataset, self.load(data))
 					end
 
 					instance.after_fetch
 
 					return instance
 				end
+				
+				def load(data)
+					MessagePack.load(attributes)
+				end
+				
+				def dump(attributes)
+					MessagePack.dump(attributes)
+				end
 			end
 			
 			include Comparable
 			
-			def id
-				@attributes[ID]
-			end
-			
-			# A string suitable for use as a URL parameter.
-			alias to_param id
-			
 			def new_record?
-				!saved?
+				!persisted?
 			end
 			
-			def saved?
-				@attributes.key? ID
+			def persisted?
+				self.id and @dataset.exist?(self.id)
 			end
 			
 			def changed? key
 				@changed.include? key.to_s
-			end
-
-			def rev
-				@attributes[REV]
 			end
 
 			def type
@@ -122,9 +122,9 @@ module Relaxo
 			def after_save
 			end
 
-			# Duplicate the model object, and possibly change the database it is connected to. You will potentially have two objects referring to the same record.
-			def dup(database = @database)
-				clone = self.class.new(database, @attributes.dup)
+			# Duplicate the model object, and possibly change the dataset it is connected to. You will potentially have two objects referring to the same record.
+			def dup(dataset = @dataset)
+				clone = self.class.new(dataset, @attributes.dup)
 				
 				clone.after_fetch
 				
@@ -132,8 +132,8 @@ module Relaxo
 			end
 
 			# Save the model object.
-			def save
-				return if saved? and @changed.empty?
+			def save(dataset)
+				return if persisted? and @changed.empty?
 				
 				before_save
 
@@ -142,22 +142,27 @@ module Relaxo
 				end
 				
 				self.flatten!
-
-				@database.save(@attributes)
-
+				
+				data = self.class.dump(@attributes)
+				dataset.write(self.id, data)
+				
 				after_save
 				
 				return true
 			end
 
-			def save!
-				result = self.save
+			def save!(dataset)
+				result = self.save(dataset)
 				
 				if result != true
 					throw ValidationErrors.new(result)
 				end
 				
 				return self
+			end
+
+			def reload(dataset)
+				@dataset = dataset
 			end
 
 			def before_delete
@@ -169,7 +174,7 @@ module Relaxo
 			def delete
 				before_delete
 
-				@database.delete(@attributes)
+				@dataset.delete(@attributes)
 
 				after_delete
 			end

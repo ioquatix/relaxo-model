@@ -59,7 +59,7 @@ module Relaxo
 					@klass.dump(value)
 				end
 				
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					@klass.load(value)
 				end
 			end
@@ -83,11 +83,11 @@ module Relaxo
 					end
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					if value.nil? or value.empty?
 						nil
 					else
-						@klass.convert_from_primative(database, value)
+						@klass.convert_from_primative(dataset, value)
 					end
 				end
 			end
@@ -100,7 +100,7 @@ module Relaxo
 					value ? true : false
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					[true, "on", "true"].include?(value)
 				end
 			end
@@ -110,7 +110,7 @@ module Relaxo
 					value.to_i
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					value.to_i
 				end
 			end
@@ -120,7 +120,7 @@ module Relaxo
 					value.to_f
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					value.to_f
 				end
 			end
@@ -130,7 +130,7 @@ module Relaxo
 					value.iso8601
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					Date.parse(value)
 				end
 			end
@@ -140,7 +140,7 @@ module Relaxo
 					value.iso8601
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					DateTime.parse(value)
 				end
 			end
@@ -150,7 +150,7 @@ module Relaxo
 					value.to_s
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					value.to_s
 				end
 			end

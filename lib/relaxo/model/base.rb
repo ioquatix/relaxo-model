@@ -18,8 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-require 'relaxo/model/recordset'
-
 module Relaxo
 	module Model
 		module Base
@@ -27,7 +25,7 @@ module Relaxo
 				# $stderr.puts "#{self} extended -> #{child} (setup Base)"
 				child.instance_variable_set(:@properties, {})
 				child.instance_variable_set(:@relationships, {})
-
+				
 				default_type = child.name.split('::').last.gsub(/(.)([A-Z])/,'\1_\2').downcase!
 				child.instance_variable_set(:@type, default_type)
 			end
@@ -41,58 +39,7 @@ module Relaxo
 			attr :type
 			attr :properties
 			attr :relationships
-
-			DEFAULT_VIEW_OPTIONS = {:include_docs => true}
-
-			def view(name, path, *args)
-				options = Hash === args.last ? args.pop : DEFAULT_VIEW_OPTIONS
-				klass = args.pop || options[:class]
-
-				self.metaclass.send(:define_method, name) do |database, query = {}|
-					records = database.view(path, query.merge(options))
-					Recordset.new(database, records, klass)
-				end
-			end
-
-			DEFAULT_RELATIONSHIP_OPTIONS = {
-				:key => lambda {|object, query| query[:key] = object.id},
-				:include_docs => true
-			}
-
-			def relationship(name, path, *args, &block)
-				options = Hash === args.last ? args.pop : DEFAULT_RELATIONSHIP_OPTIONS
-				klass = block || args.pop || options[:class]
-
-				@relationships[name] = options
-
-				# This reduction returns a single result, so just provide the first row directly:
-				reduction = options.delete(:reduction)
-
-				options = options.dup
-
-				update_key_function(options, :key)
-				update_key_function(options, :startkey)
-				update_key_function(options, :endkey)
-
-				self.send(:define_method, name) do |query = {}|
-					query = query.merge(options)
-
-					[:key, :startkey, :endkey].each do |name|
-						if options[name].respond_to? :call
-							options[name].call(self, query)
-						end
-					end
-
-					recordset = Recordset.new(@database, @database.view(path, query), klass)
-
-					if reduction == :first
-						recordset.first
-					else
-						recordset
-					end
-				end
-			end
-
+			
 			def property(name, klass = nil)
 				name = name.to_s
 
@@ -105,7 +52,7 @@ module Relaxo
 						if klass
 							value = @attributes[name]
 
-							@changed[name] = klass.convert_from_primative(@database, value)
+							@changed[name] = klass.convert_from_primative(dataset, value)
 						else
 							@changed[name] = @attributes[name]
 						end

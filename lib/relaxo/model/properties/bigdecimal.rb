@@ -28,7 +28,7 @@ module Relaxo
 					value.to_s('F')
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					value.to_d
 				end
 			end

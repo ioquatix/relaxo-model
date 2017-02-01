@@ -22,7 +22,6 @@ require 'relaxo'
 
 require 'relaxo/model/document'
 require 'relaxo/model/properties'
-require 'relaxo/model/recordset'
 
 module Relaxo
 	module Model

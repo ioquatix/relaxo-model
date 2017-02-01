@@ -20,3 +20,4 @@
 
 require 'relaxo/model/properties/attribute'
 require 'relaxo/model/properties/composite'
+require 'relaxo/model/properties/uuid'

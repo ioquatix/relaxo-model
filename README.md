@@ -9,7 +9,7 @@ Here is a simple example of a traditional ORM style model:
 	require 'relaxo'
 	require 'relaxo/model'
 
-	database = Relaxo.connect("http://localhost:5984/test")
+	dataset = Relaxo.connect("http://localhost:5984/test")
 
 	trees = [
 		{:name => 'Hinoki', :planted => Date.parse("1948/4/2")},
@@ -27,12 +27,12 @@ Here is a simple example of a traditional ORM style model:
 	end
 
 	trees.each do |doc|
-		tree = Tree.create(database, doc)
+		tree = Tree.create(dataset, doc)
 	
 		tree.save
 	end
 
-	Tree.all(database).each do |tree|
+	Tree.all(dataset).each do |tree|
 		puts "A #{tree.name} was planted on #{tree.planted.to_s}."
 
 		# Expected output:
@@ -55,7 +55,7 @@ Here is the design document:
 	                    }
 	                }
 
-If the design document was saved as `catalog.yaml`, you could load it using relaxo into the `test` database as follows:
+If the design document was saved as `catalog.yaml`, you could load it using relaxo into the `test` dataset as follows:
 
 	relaxo test catalog.yaml 
 

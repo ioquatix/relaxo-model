@@ -28,7 +28,7 @@ module Relaxo
 					[value.salt, value.checksum]
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					if String === value
 						# If the primative value is a string, we are saving the password:
 						BCrypt::Password.create(value)

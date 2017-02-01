@@ -28,7 +28,7 @@ module Relaxo
 					[value.amount.to_s('F'), value.name]
 				end
 
-				def convert_from_primative(database, value)
+				def convert_from_primative(dataset, value)
 					if Array === value
 						@klass.new(value[0], value[1])
 					else
