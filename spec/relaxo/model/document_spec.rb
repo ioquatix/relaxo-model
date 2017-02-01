@@ -13,7 +13,6 @@ RSpec.describe Relaxo::Model::Document do
 	let(:database) {Relaxo.connect(database_path)}
 	
 	let(:document_path) {'test/document.json'}
-	let(:sample_json) {'[1, 2, 3]'}
 	
 	before(:each) {FileUtils.rm_rf(database_path)}
 	
@@ -22,12 +21,13 @@ RSpec.describe Relaxo::Model::Document do
 			name: "Samuel Williams"
 		)
 		
+		expect(model.persisted?).to be_falsey
+		
 		database.transaction("Adding test model") do |dataset|
 			model.save(dataset)
 		end
 		
 		model.reload(database.current)
-		
 		expect(model.id).to_not be nil
 		expect(model.persisted?).to be_truthy
 	end
