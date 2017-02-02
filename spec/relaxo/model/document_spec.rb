@@ -23,7 +23,7 @@ RSpec.describe Relaxo::Model::Document do
 		
 		expect(model.persisted?).to be_falsey
 		
-		database.transaction("Adding test model") do |dataset|
+		database.commit(message: "Adding test model") do |dataset|
 			model.save(dataset)
 		end
 		

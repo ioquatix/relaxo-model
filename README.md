@@ -1,15 +1,18 @@
 # Relaxo Model
 
-Relaxo Model provides a framework for business logic on top of Relaxo/CouchDB. While it supports some traditional ORM style patterns, it is primary focus is to model business processes and logic.
+Relaxo Model provides a framework for business logic on top of Relaxo. While it supports some traditional ORM style patterns, it is primary focus is to model business processes and logic.
+
+[![Build Status](https://secure.travis-ci.org/ioquatix/relaxo-model.svg)](http://travis-ci.org/ioquatix/relaxo-model)
+[![Code Climate](https://codeclimate.com/github/ioquatix/relaxo-model.svg)](https://codeclimate.com/github/ioquatix/relaxo-model)
+[![Coverage Status](https://coveralls.io/repos/ioquatix/relaxo-model/badge.svg)](https://coveralls.io/r/ioquatix/relaxo-model)
 
 ## Basic Usage
 
 Here is a simple example of a traditional ORM style model:
 
-	require 'relaxo'
 	require 'relaxo/model'
 
-	dataset = Relaxo.connect("http://localhost:5984/test")
+	database = Relaxo.connect("http://localhost:5984/test")
 
 	trees = [
 		{:name => 'Hinoki', :planted => Date.parse("1948/4/2")},
@@ -18,47 +21,35 @@ Here is a simple example of a traditional ORM style model:
 	
 	class Tree
 		include Relaxo::Model
-	
+		
+		property :id, UUID
 		property :name
 		property :planted, Attribute[Date]
 	
 		# Ensure you've loaded an appropriate design document:
 		view :all, 'catalog/tree', Tree
 	end
-
-	trees.each do |doc|
-		tree = Tree.create(dataset, doc)
 	
-		tree.save
+	database.transaction("Create trees") do |dataset|
+		trees.each do |doc|
+			tree = Tree.create(dataset, doc)
+		
+			tree.save
+		end
 	end
-
-	Tree.all(dataset).each do |tree|
-		puts "A #{tree.name} was planted on #{tree.planted.to_s}."
-
-		# Expected output:
-		# => A Rimu was planted on 1962-08-07.
-		# => A Hinoki was planted on 1948-04-02.
 	
-		tree.delete
+	database.head do |dataset|
+		Tree.all(dataset).each do |tree|
+			puts "A #{tree.name} was planted on #{tree.planted.to_s}."
+
+			# Expected output:
+			# => A Rimu was planted on 1962-08-07.
+			# => A Hinoki was planted on 1948-04-02.
+		
+			tree.delete
+		end
 	end
-
-Here is the design document:
-
-	-   _id: "_design/catalog"
-	    language: javascript
-	    views:
-	        tree:
-	            map: |
-	                function(doc) {
-	                    if (doc.type == 'tree') {
-	                        emit(doc._id, doc._rev);
-	                    }
-	                }
-
-If the design document was saved as `catalog.yaml`, you could load it using relaxo into the `test` dataset as follows:
-
-	relaxo test catalog.yaml 
-
+	
 ## Contributing
 
 1. Fork it
