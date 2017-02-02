@@ -69,14 +69,24 @@ module Relaxo
 
 					return instance
 				end
-
+				
+				def insert(dataset, properties)
+					instance = self.create(dataset, properties)
+					
+					instance.save(dataset)
+					
+					return instance
+				end
+				
 				# Fetch a record or create a model object from a hash of attributes.
 				def fetch(dataset, id_or_attributes)
 					if Hash === id_or_attributes
+						# We were passed a hash of attributes:
 						instance = self.new(dataset, id_or_attributes)
 					else
+						# We were passed a path/id string:
 						data = dataset.read(id_or_attributes)
-						instance = self.new(dataset, self.load(data))
+						instance = self.load(dataset, data)
 					end
 
 					instance.after_fetch
@@ -84,12 +94,14 @@ module Relaxo
 					return instance
 				end
 				
-				def load(data)
-					MessagePack.load(attributes)
-				end
-				
-				def dump(attributes)
-					MessagePack.dump(attributes)
+				def load(dataset, data)
+					attributes = MessagePack.load(data)
+					
+					instance = self.new(dataset, attributes)
+					
+					instance.after_load
+					
+					return instance
 				end
 			end
 			
@@ -130,6 +142,10 @@ module Relaxo
 				
 				return clone
 			end
+			
+			def dump
+				MessagePack.dump(@attributes)
+			end
 
 			# Save the model object.
 			def save(dataset)
@@ -143,8 +159,7 @@ module Relaxo
 				
 				self.flatten!
 				
-				data = self.class.dump(@attributes)
-				dataset.write(self.id, data)
+				dataset.write(self.id, self.dump)
 				
 				after_save
 				
@@ -177,6 +192,9 @@ module Relaxo
 				@dataset.delete(@attributes)
 
 				after_delete
+			end
+
+			def after_load
 			end
 
 			def after_fetch

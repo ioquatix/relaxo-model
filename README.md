@@ -1,6 +1,6 @@
 # Relaxo Model
 
-Relaxo Model provides a framework for business logic on top of Relaxo. While it supports some traditional ORM style patterns, it is primary focus is to model business processes and logic.
+Relaxo Model provides a framework for business logic on top of Relaxo, a document data store built on top of git. While it supports some traditional relational style patterns, it is primary focus is to model business processes and logic at the document level.
 
 [![Build Status](https://secure.travis-ci.org/ioquatix/relaxo-model.svg)](http://travis-ci.org/ioquatix/relaxo-model)
 [![Code Climate](https://codeclimate.com/github/ioquatix/relaxo-model.svg)](https://codeclimate.com/github/ioquatix/relaxo-model)
@@ -12,7 +12,7 @@ Here is a simple example of a traditional ORM style model:
 
 	require 'relaxo/model'
 
-	database = Relaxo.connect("http://localhost:5984/test")
+	database = Relaxo.connect("test")
 
 	trees = [
 		{:name => 'Hinoki', :planted => Date.parse("1948/4/2")},

@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+require_relative 'recordset'
+
 module Relaxo
 	module Model
 		module Base
@@ -39,6 +41,12 @@ module Relaxo
 			attr :type
 			attr :properties
 			attr :relationships
+			
+			def view(name, path = nil, klass: self)
+				self.metaclass.send(:define_method, name) do |dataset|
+					Recordset.new(dataset, path, klass)
+				end
+			end
 			
 			def property(name, klass = nil)
 				name = name.to_s

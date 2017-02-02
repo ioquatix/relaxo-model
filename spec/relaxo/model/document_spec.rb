@@ -6,6 +6,8 @@ class TestModel
 	
 	property :id, UUID
 	property :name
+	
+	view :all
 end
 
 RSpec.describe Relaxo::Model::Document do
@@ -30,5 +32,15 @@ RSpec.describe Relaxo::Model::Document do
 		model.reload(database.current)
 		expect(model.id).to_not be nil
 		expect(model.persisted?).to be_truthy
+	end
+	
+	it "should enumearte model objects" do
+		database.commit(message: "Adding test model") do |dataset|
+			TestModel.insert(dataset, name: "Samuel Williams")
+			TestModel.insert(dataset, name: "Hinoki Williams")
+			TestModel.insert(dataset, name: "Keyaki Williams")
+		end
+		
+		expect(TestModel.all(database.current).count).to be == 3
 	end
 end
