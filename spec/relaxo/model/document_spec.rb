@@ -7,7 +7,7 @@ class TestModel
 	property :id, UUID
 	property :name
 	
-	view :all
+	view :all, 'test_model'
 end
 
 RSpec.describe Relaxo::Model::Document do
@@ -29,7 +29,6 @@ RSpec.describe Relaxo::Model::Document do
 			model.save(dataset)
 		end
 		
-		model.reload(database.current)
 		expect(model.id).to_not be nil
 		expect(model.persisted?).to be_truthy
 	end

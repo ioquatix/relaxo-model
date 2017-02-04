@@ -34,8 +34,8 @@ module Relaxo
 			attr :view
 			
 			def each(model = @model, &block)
-				@dataset.each(@path) do |name, data|
-					yield model.load(@dataset, data)
+				@dataset.each(@path) do |name, object|
+					yield model.new(@dataset, object)
 				end
 			end
 		end

@@ -28,15 +28,32 @@ module Relaxo
 				child.send(:extend, Base)
 			end
 			
-			def initialize(dataset, attributes = {})
-				@attributes = attributes
+			def initialize(dataset, object = nil, **attributes)
 				@dataset = dataset
+				@object = object
+				@attributes = attributes
+				
+				load
+				
 				@changed = {}
 			end
 
 			attr :attributes
 			attr :dataset
 			attr :changed
+
+			def load
+				if @object
+					attributes = MessagePack.load(@object.data)
+					@attributes.update(attributes)
+				end
+			end
+			
+			def dump
+				flatten!
+				
+				MessagePack.dump(@attributes)
+			end
 
 			def clear(key)
 				@changed.delete(key)

@@ -47,8 +47,6 @@ module Relaxo
 		end
 		
 		module Document
-			TYPE = 'type'.freeze
-			
 			def self.included(child)
 				child.send(:include, Component)
 				child.send(:extend, ClassMethods)
@@ -57,7 +55,7 @@ module Relaxo
 			module ClassMethods
 				# Create a new document with a particular specified type.
 				def create(dataset, properties = nil)
-					instance = self.new(dataset, {TYPE => @type})
+					instance = self.new(dataset, type: @type)
 
 					if properties
 						properties.each do |key, value|
@@ -79,27 +77,12 @@ module Relaxo
 				end
 				
 				# Fetch a record or create a model object from a hash of attributes.
-				def fetch(dataset, id_or_attributes)
-					if Hash === id_or_attributes
-						# We were passed a hash of attributes:
-						instance = self.new(dataset, id_or_attributes)
-					else
-						# We were passed a path/id string:
-						data = dataset.read(id_or_attributes)
-						instance = self.load(dataset, data)
-					end
-
+				def fetch(dataset, path = nil, **attributes)
+					object = dataset.read(path) if path
+					
+					instance = self.new(dataset, object, attributes)
+					
 					instance.after_fetch
-
-					return instance
-				end
-				
-				def load(dataset, data)
-					attributes = MessagePack.load(data)
-					
-					instance = self.new(dataset, attributes)
-					
-					instance.after_load
 					
 					return instance
 				end
@@ -112,7 +95,7 @@ module Relaxo
 			end
 			
 			def persisted?
-				self.id and @dataset.exist?(self.id)
+				@object != nil
 			end
 			
 			def changed? key
@@ -120,7 +103,7 @@ module Relaxo
 			end
 
 			def type
-				@attributes[TYPE]
+				@attributes[:type]
 			end
 
 			def valid_type?
@@ -136,15 +119,17 @@ module Relaxo
 
 			# Duplicate the model object, and possibly change the dataset it is connected to. You will potentially have two objects referring to the same record.
 			def dup(dataset = @dataset)
-				clone = self.class.new(dataset, @attributes.dup)
+				clone = self.class.new(dataset, @object, @attributes.dup)
 				
 				clone.after_fetch
 				
 				return clone
 			end
 			
-			def dump
-				MessagePack.dump(@attributes)
+			def paths
+				return to_enum(:paths) unless block_given?
+				
+				yield "#{self.type}/#{self.id}" if self.id
 			end
 
 			# Save the model object.
@@ -152,14 +137,27 @@ module Relaxo
 				return if persisted? and @changed.empty?
 				
 				before_save
-
+				
 				if errors = self.validate
 					return errors
 				end
 				
-				self.flatten!
+				existing_paths = paths
 				
-				dataset.write(self.id, self.dump)
+				# Write data, check if any actual changes made:
+				object = dataset.append(self.dump)
+				return if object == @object
+				
+				existing_paths.each do |path|
+					dataset.remove(path) rescue nil
+				end
+				
+				paths do |path|
+					dataset.write(path, object)
+				end
+				
+				@dataset = dataset
+				@object = object
 				
 				after_save
 				
@@ -186,10 +184,14 @@ module Relaxo
 			def after_delete
 			end
 
-			def delete
+			def delete(dataset)
 				before_delete
-
-				@dataset.delete(@attributes)
+				
+				@changed.clear
+				
+				paths.each do |path|
+					@dataset.delete(path)
+				end
 
 				after_delete
 			end
