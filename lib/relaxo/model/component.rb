@@ -41,7 +41,7 @@ module Relaxo
 			attr :attributes
 			attr :dataset
 			attr :changed
-
+			
 			def load
 				if @object
 					attributes = MessagePack.load(@object.data)
@@ -118,8 +118,8 @@ module Relaxo
 						else
 							@attributes[key] = @changed.delete(key)
 						end
-					elsif default = klass.default and !@attributes.include?(key)
-						@attributes[key] = default
+					elsif !@attributes.include?(key) and klass.respond_to?(:default)
+						@attributes[key] = klass.default
 					end
 				end
 

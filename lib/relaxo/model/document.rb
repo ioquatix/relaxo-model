@@ -129,7 +129,9 @@ module Relaxo
 			def paths
 				return to_enum(:paths) unless block_given?
 				
-				yield "#{self.type}/#{self.id}" if self.id
+				self.class.keys.each do |name, key|
+					yield key.object_path(self)
+				end
 			end
 
 			# Save the model object.

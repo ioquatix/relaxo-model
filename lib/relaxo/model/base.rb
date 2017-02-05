@@ -23,10 +23,36 @@ require_relative 'recordset'
 module Relaxo
 	module Model
 		module Base
+			Key = Struct.new(:prefix, :index) do
+				def resolve(key_path, model)
+					key_path.collect do |component|
+						case component
+						when Symbol
+							model.send(component)
+						when Array
+							resolve(component, model).join('-')
+						when Proc
+							model.instance_exec(&component)
+						else
+							component.to_s
+						end
+					end
+				end
+				
+				def object_path(model)
+					resolve(self.prefix + self.index, model).join('/')
+				end
+				
+				def prefix_path(model)
+					resolve(self.prefix, model).join('/')
+				end
+			end
+			
 			def self.extended(child)
 				# $stderr.puts "#{self} extended -> #{child} (setup Base)"
 				child.instance_variable_set(:@properties, {})
 				child.instance_variable_set(:@relationships, {})
+				child.instance_variable_set(:@keys, {})
 				
 				default_type = child.name.split('::').last.gsub(/(.)([A-Z])/,'\1_\2').downcase!
 				child.instance_variable_set(:@type, default_type)
@@ -41,10 +67,17 @@ module Relaxo
 			attr :type
 			attr :properties
 			attr :relationships
+			attr :keys
 			
-			def view(name, path = nil, klass: self)
+			def view(name, path = nil, klass: self, index: nil)
+				key = Key.new(path, index)
+				
+				if index
+					@keys[name] = key
+				end
+				
 				self.metaclass.send(:define_method, name) do |dataset|
-					Recordset.new(dataset, path, klass)
+					Recordset.new(dataset, key.prefix_path(self), klass)
 				end
 			end
 			
@@ -82,26 +115,6 @@ module Relaxo
 						!value.empty?
 					else
 						true
-					end
-				end
-			end
-			
-			private
-
-			# Used for generating key functions for relationships - subject to change so private for now.
-			def update_key_function(options, name)
-				key = options[name]
-				
-				if key == :self
-					options[name] = lambda do |object, query|
-						query[name] = object.id
-					end
-				elsif Array === key
-					index = key.index(:self)
-					
-					options[name] = lambda do |object, query|
-						query[name] = key.dup
-						query[name][index] = object.id
 					end
 				end
 			end

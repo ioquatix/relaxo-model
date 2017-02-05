@@ -1,13 +1,28 @@
 
 require 'relaxo/model'
 
-class TestModel
+class Invoice
 	include Relaxo::Model
 	
 	property :id, UUID
+	property :number
 	property :name
 	
-	view :all, 'test_model'
+	property :date, Attribute[Date]
+	
+	view :all, [:type], index: [:id]
+	view :transactions, [:primary_key, 'transactions']
+end
+
+class Invoice::Transaction
+	include Relaxo::Model
+	
+	property :id, UUID
+	property :invoice, BelongsTo[Invoice]
+	property :date, Attribute[Date]
+	
+	view :all, [:type], index: [:id]
+	view :by_invoice, [:invoice, :type, [:date, :id]], index: [:id]
 end
 
 RSpec.describe Relaxo::Model::Document do
@@ -19,8 +34,8 @@ RSpec.describe Relaxo::Model::Document do
 	before(:each) {FileUtils.rm_rf(database_path)}
 	
 	it "should create and save document" do
-		model = TestModel.create(database.current, 
-			name: "Samuel Williams"
+		model = Invoice.create(database.current, 
+			name: "Software Development"
 		)
 		
 		expect(model.persisted?).to be_falsey
@@ -35,11 +50,11 @@ RSpec.describe Relaxo::Model::Document do
 	
 	it "should enumearte model objects" do
 		database.commit(message: "Adding test model") do |dataset|
-			TestModel.insert(dataset, name: "Samuel Williams")
-			TestModel.insert(dataset, name: "Hinoki Williams")
-			TestModel.insert(dataset, name: "Keyaki Williams")
+			Invoice.insert(dataset, name: "Software Development")
+			Invoice.insert(dataset, name: "Website Hosting")
+			Invoice.insert(dataset, name: "Backup Services")
 		end
 		
-		expect(TestModel.all(database.current).count).to be == 3
+		expect(Invoice.all(database.current).count).to be == 3
 	end
 end
