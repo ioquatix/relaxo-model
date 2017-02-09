@@ -28,20 +28,19 @@ module Relaxo
 				child.send(:extend, Base)
 			end
 			
-			def initialize(dataset, object = nil, **attributes)
+			def initialize(dataset, object = nil, changed = {}, **attributes)
 				@dataset = dataset
 				@object = object
+				@changed = changed
 				@attributes = attributes
-				
-				load
-				
-				@changed = {}
 			end
 			
-			def load
+			def load_object
 				if @object
 					attributes = MessagePack.load(@object.data, symbolize_keys: true)
-					@attributes = @attributes.merge(attributes)
+					
+					# We prefer existing @attributes over ones loaded from data. This allows the API to load from an object, but specify new attributes.
+					@attributes = attributes.merge(@attributes)
 				end
 			end
 			
@@ -64,7 +63,7 @@ module Relaxo
 				enumerator = primative_attributes
 
 				if only == :all
-					enumerator = enumerator.select{|key, value| self.class.properties.include? key.to_s}
+					enumerator = enumerator.select{|key, value| self.class.properties.include? key.to_sym}
 				elsif only.respond_to? :include?
 					enumerator = enumerator.select{|key, value| only.include? key.to_sym}
 				end

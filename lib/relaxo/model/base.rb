@@ -87,8 +87,12 @@ module Relaxo
 					Recordset.new(dataset, key.prefix_path(self, **arguments), klass)
 				end
 				
+				self.metaclass.send(:define_method, "fetch_#{name}") do |dataset, **arguments|
+					self.fetch(dataset, key.object_path(self, **arguments))
+				end
+				
 				self.send(:define_method, name) do |**arguments|
-					Recordset.new(self.dataset, key.object_path(**arguments))
+					Recordset.new(self.dataset, key.object_path(self, **arguments), self.class)
 				end
 			end
 			

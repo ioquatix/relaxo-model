@@ -78,13 +78,15 @@ module Relaxo
 				
 				# Fetch a record or create a model object from a hash of attributes.
 				def fetch(dataset, path = nil, **attributes)
-					object = dataset.read(path) if path
-					
-					instance = self.new(dataset, object, attributes)
-					
-					instance.after_fetch
-					
-					return instance
+					if path and object = dataset.read(path)
+						instance = self.new(dataset, object, attributes)
+						
+						instance.load_object
+						
+						instance.after_fetch
+						
+						return instance
+					end
 				end
 			end
 			
@@ -126,8 +128,8 @@ module Relaxo
 			end
 
 			# Duplicate the model object, and possibly change the dataset it is connected to. You will potentially have two objects referring to the same record.
-			def dup(dataset = @dataset)
-				clone = self.class.new(dataset, @object, @attributes.dup)
+			def dup
+				clone = self.class.new(@dataset, @object, @changed, **@attributes.dup)
 				
 				clone.after_fetch
 				
@@ -204,9 +206,6 @@ module Relaxo
 				end
 
 				after_delete
-			end
-
-			def after_load
 			end
 
 			def after_fetch
