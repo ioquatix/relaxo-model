@@ -22,37 +22,41 @@ require_relative 'recordset'
 
 module Relaxo
 	module Model
-		module Base
-			Key = Struct.new(:prefix, :index) do
-				def resolve(key_path, model)
-					key_path.collect do |component|
-						case component
-						when Symbol
-							model.send(component)
-						when Array
-							resolve(component, model).join('-')
-						when Proc
-							model.instance_exec(&component)
-						else
-							component.to_s
-						end
+		Key = Struct.new(:prefix, :index) do
+			def resolve(key_path, model, **arguments)
+				key_path.collect do |component|
+					case component
+					when Symbol
+						arguments[component] || model.send(component)
+					when Array
+						resolve(component, model, arguments).join('-')
+					when Proc
+						model.instance_exec(**arguments, &component)
+					when NilClass
+						"null"
+					else
+						component
 					end
-				end
-				
-				def object_path(model)
-					resolve(self.prefix + self.index, model).join('/')
-				end
-				
-				def prefix_path(model)
-					resolve(self.prefix, model).join('/')
 				end
 			end
 			
+			def object_path(model, **arguments)
+				resolve(self.prefix + self.index, model, **arguments).join('/')
+			end
+			
+			def prefix_path(model, **arguments)
+				resolve(self.prefix, model, **arguments).join('/')
+			end
+		end
+		
+		module Base
 			def self.extended(child)
 				# $stderr.puts "#{self} extended -> #{child} (setup Base)"
 				child.instance_variable_set(:@properties, {})
 				child.instance_variable_set(:@relationships, {})
+				
 				child.instance_variable_set(:@keys, {})
+				child.instance_variable_set(:@primary_key, nil)
 				
 				default_type = child.name.split('::').last.gsub(/(.)([A-Z])/,'\1_\2').downcase!
 				child.instance_variable_set(:@type, default_type)
@@ -67,23 +71,28 @@ module Relaxo
 			attr :type
 			attr :properties
 			attr :relationships
+			
 			attr :keys
+			attr :primary_key
 			
 			def view(name, path = nil, klass: self, index: nil)
 				key = Key.new(path, index)
 				
 				if index
 					@keys[name] = key
+					@primary_key ||= key
 				end
 				
-				self.metaclass.send(:define_method, name) do |dataset|
-					Recordset.new(dataset, key.prefix_path(self), klass)
+				self.metaclass.send(:define_method, name) do |dataset, **arguments|
+					Recordset.new(dataset, key.prefix_path(self, **arguments), klass)
+				end
+				
+				self.send(:define_method, name) do |**arguments|
+					Recordset.new(self.dataset, key.object_path(**arguments))
 				end
 			end
 			
 			def property(name, klass = nil)
-				name = name.to_s
-
 				@properties[name] = klass
 
 				self.send(:define_method, name) do

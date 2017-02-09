@@ -117,6 +117,14 @@ module Relaxo
 			def after_save
 			end
 
+			def to_s
+				if primary_key = self.class.primary_key
+					primary_key.object_path(self)
+				else
+					super
+				end
+			end
+
 			# Duplicate the model object, and possibly change the dataset it is connected to. You will potentially have two objects referring to the same record.
 			def dup(dataset = @dataset)
 				clone = self.class.new(dataset, @object, @attributes.dup)

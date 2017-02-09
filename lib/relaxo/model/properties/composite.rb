@@ -45,9 +45,9 @@ module Relaxo
 				end
 				
 				def convert_to_primative(object)
-					unless object.saved?
-						object.save
-					end
+					# unless object.saved?
+					# 	object.save
+					# end
 
 					[object.type, object.id]
 				end
@@ -81,29 +81,27 @@ module Relaxo
 					@klass = klass
 				end
 
-				def convert_to_primative(object)
-					unless object.saved?
-						object.save
-					end
-
-					object.id
+				def convert_to_primative(document)
+					throw ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
+					
+					document.paths.first
 				end
 
-				def convert_from_primative(dataset, id)
-					@klass.fetch(dataset, id)
+				def convert_from_primative(dataset, path)
+					@klass.fetch(dataset, path)
 				end
 			end
-		
+			
 			class HasOne < BelongsTo
 			end
 		
 			class HasMany < HasOne
-				def convert_to_primative(value)
-					value.each do |document|
-						document.save unless document.saved?
+				def convert_to_primative(documents)
+					documents.each do |document|
+						throw ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
 					end
-				
-					value.collect{|document| document.id}
+					
+					documents.collect{|document| document.paths.first}
 				end
 
 				def convert_from_primative(dataset, value)

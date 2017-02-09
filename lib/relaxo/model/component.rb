@@ -37,15 +37,11 @@ module Relaxo
 				
 				@changed = {}
 			end
-
-			attr :attributes
-			attr :dataset
-			attr :changed
 			
 			def load
 				if @object
-					attributes = MessagePack.load(@object.data)
-					@attributes.update(attributes)
+					attributes = MessagePack.load(@object.data, symbolize_keys: true)
+					@attributes = @attributes.merge(attributes)
 				end
 			end
 			
@@ -54,6 +50,10 @@ module Relaxo
 				
 				MessagePack.dump(@attributes)
 			end
+
+			attr :attributes
+			attr :dataset
+			attr :changed
 
 			def clear(key)
 				@changed.delete(key)
@@ -70,7 +70,7 @@ module Relaxo
 				end
 
 				enumerator.each do |key, value|
-					key = key.to_s
+					key = key.to_sym
 
 					klass = self.class.properties[key]
 
@@ -86,8 +86,6 @@ module Relaxo
 			end
 
 			def [] name
-				name = name.to_s
-
 				if self.class.properties.include? name
 					self.send(name)
 				else
@@ -96,8 +94,6 @@ module Relaxo
 			end
 
 			def []= name, value
-				name = name.to_s
-
 				if self.class.properties.include? name
 					self.send("#{name}=", value)
 				else

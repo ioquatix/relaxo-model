@@ -2,6 +2,8 @@
 require 'relaxo/model'
 
 class Invoice
+	class Transaction; end
+	
 	include Relaxo::Model
 	
 	property :id, UUID
@@ -11,7 +13,10 @@ class Invoice
 	property :date, Attribute[Date]
 	
 	view :all, [:type], index: [:id]
-	view :transactions, [:primary_key, 'transactions']
+	
+	def transactions
+		Invoice::Transaction.by_invoice(@dataset, invoice: self)
+	end
 end
 
 class Invoice::Transaction
@@ -22,7 +27,8 @@ class Invoice::Transaction
 	property :date, Attribute[Date]
 	
 	view :all, [:type], index: [:id]
-	view :by_invoice, [:invoice, :type, [:date, :id]], index: [:id]
+	
+	view :by_invoice, ['by_invoice', :invoice], index: [[:date, :id]]
 end
 
 RSpec.describe Relaxo::Model::Document do
@@ -48,7 +54,7 @@ RSpec.describe Relaxo::Model::Document do
 		expect(model.persisted?).to be_truthy
 	end
 	
-	it "should enumearte model objects" do
+	it "should enumerate model objects" do
 		database.commit(message: "Adding test model") do |dataset|
 			Invoice.insert(dataset, name: "Software Development")
 			Invoice.insert(dataset, name: "Website Hosting")
@@ -56,5 +62,23 @@ RSpec.describe Relaxo::Model::Document do
 		end
 		
 		expect(Invoice.all(database.current).count).to be == 3
+	end
+	
+	it "should create model indexes" do
+		database.commit(message: "Adding test model") do |dataset|
+			invoice = Invoice.create(dataset, name: "Software Development")
+			invoice.save(dataset)
+			
+			transaction = Invoice::Transaction.create(dataset, date: Date.today, invoice: invoice)
+			transaction.save(dataset)
+		end
+		
+		expect(Invoice.all(database.current).count).to be == 1
+		expect(Invoice::Transaction.all(database.current).count).to be == 1
+		
+		invoice = Invoice.all(database.current).first
+		
+		transactions = Invoice::Transaction.by_invoice(database.current, invoice: invoice)
+		expect(transactions).to_not be_empty
 	end
 end

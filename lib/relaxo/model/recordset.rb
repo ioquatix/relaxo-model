@@ -33,6 +33,10 @@ module Relaxo
 			attr :database
 			attr :view
 			
+			def empty?
+				!@dataset.each(@path).any?
+			end
+			
 			def each(model = @model, &block)
 				@dataset.each(@path) do |name, object|
 					yield model.new(@dataset, object)
