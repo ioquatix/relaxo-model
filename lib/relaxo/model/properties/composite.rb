@@ -44,27 +44,18 @@ module Relaxo
 					@lookup[type]
 				end
 				
-				def convert_to_primative(object)
-					# unless object.saved?
-					# 	object.save
-					# end
+				def convert_to_primative(document)
+					throw ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
 
-					[object.type, object.id]
+					document.paths.first
 				end
 
-				def convert_from_primative(dataset, reference)
-					# Legacy support for old polymorphic types - to remove.
-					if Array === reference
-						type, id = reference
-					else
-						id = reference
-					end
+				def convert_from_primative(dataset, path)
+					type, id = path.split('/', 2)
 					
-					attributes = dataset.get(id).to_hash
+					klass = lookup(type)
 					
-					klass = lookup(attributes['type'])
-					
-					klass.fetch(dataset, attributes)
+					klass.fetch(dataset, path)
 				end
 			end
 

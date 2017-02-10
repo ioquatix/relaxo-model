@@ -28,7 +28,7 @@ class Invoice::Transaction
 	
 	view :all, [:type], index: [:id]
 	
-	view :by_invoice, ['by_invoice', :invoice], index: [[:date, :id]]
+	view :by_invoice, [:type, 'by_invoice', :invoice], index: [[:date, :id]]
 end
 
 RSpec.describe Relaxo::Model::Document do
@@ -77,6 +77,7 @@ RSpec.describe Relaxo::Model::Document do
 		expect(Invoice::Transaction.all(database.current).count).to be == 1
 		
 		invoice = Invoice.all(database.current).first
+		expect(invoice).to_not be nil
 		
 		transactions = Invoice::Transaction.by_invoice(database.current, invoice: invoice)
 		expect(transactions).to_not be_empty

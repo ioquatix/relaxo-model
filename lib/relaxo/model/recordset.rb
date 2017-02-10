@@ -39,7 +39,10 @@ module Relaxo
 			
 			def each(model = @model, &block)
 				@dataset.each(@path) do |name, object|
-					yield model.new(@dataset, object)
+					object = model.new(@dataset, object)
+					object.load_object
+					
+					yield object
 				end
 			end
 		end
