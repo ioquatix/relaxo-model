@@ -62,8 +62,6 @@ module Relaxo
 				child.instance_variable_set(:@type, default_type)
 			end
 
-			attr :type
-
 			def metaclass
 				class << self; self; end
 			end
@@ -74,6 +72,10 @@ module Relaxo
 			
 			attr :keys
 			attr :primary_key
+			
+			def parent_type klass
+				@type = [klass.type, self.type].join('/')
+			end
 			
 			def view(name, path = nil, klass: self, index: nil)
 				key = Key.new(path, index)
