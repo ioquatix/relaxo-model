@@ -167,7 +167,7 @@ module Relaxo
 				
 				paths do |path|
 					if dataset.exist?(path)
-						raise KeyError, "Dataset already contains path: #{path}"
+						raise KeyError, "Dataset already contains path: #{path}, when inserting #{@attributes.inspect}"
 					end
 						
 					dataset.write(path, object)
