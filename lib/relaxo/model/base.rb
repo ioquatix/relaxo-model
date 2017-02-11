@@ -27,13 +27,11 @@ module Relaxo
 				key_path.collect do |component|
 					case component
 					when Symbol
-						arguments[component] || model.send(component)
+						arguments[component] || model.send(component) || "null"
 					when Array
 						resolve(component, model, arguments).join('-')
 					when Proc
 						model.instance_exec(**arguments, &component)
-					when NilClass
-						"null"
 					else
 						component
 					end
