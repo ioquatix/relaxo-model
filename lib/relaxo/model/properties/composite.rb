@@ -45,7 +45,7 @@ module Relaxo
 				end
 				
 				def convert_to_primative(document)
-					throw ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
+					raise ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
 
 					document.paths.first
 				end
@@ -73,7 +73,7 @@ module Relaxo
 				end
 
 				def convert_to_primative(document)
-					throw ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
+					raise ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
 					
 					document.paths.first
 				end
@@ -89,7 +89,7 @@ module Relaxo
 			class HasMany < HasOne
 				def convert_to_primative(documents)
 					documents.each do |document|
-						throw ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
+						raise ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
 					end
 					
 					documents.collect{|document| document.paths.first}

@@ -185,7 +185,7 @@ module Relaxo
 				result = self.save(dataset)
 				
 				if result != true
-					throw ValidationErrors.new(result)
+					raise ValidationErrors.new(result)
 				end
 				
 				return self
