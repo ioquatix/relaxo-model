@@ -82,4 +82,21 @@ RSpec.describe Relaxo::Model::Document do
 		transactions = Invoice::Transaction.by_invoice(database.current, invoice: invoice)
 		expect(transactions).to_not be_empty
 	end
+	
+	it "updates indexes correctly" do
+		transaction = nil
+		
+		database.commit(message: "Adding test model") do |dataset|
+			invoice = Invoice.create(dataset, name: "Software Development")
+			invoice.save(dataset)
+			
+			transaction = Invoice::Transaction.create(dataset, date: Date.today, invoice: invoice)
+			transaction.save(dataset)
+		end
+		
+		database.commit(message: "Adding test model") do |dataset|
+			transaction.date = Date.today - 1
+			transaction.save(dataset)
+		end
+	end
 end

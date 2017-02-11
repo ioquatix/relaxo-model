@@ -140,7 +140,8 @@ module Relaxo
 				return to_enum(:paths) unless block_given?
 				
 				self.class.keys.each do |name, key|
-					yield key.object_path(self)
+					# @attributes is not modified until we call self.dump (which flattens @attributes into @changes). When we generate paths, we want to ensure these are done based on the non-mutable state of the object.
+					yield key.object_path(self, @attributes)
 				end
 			end
 
@@ -154,14 +155,14 @@ module Relaxo
 					return errors
 				end
 				
-				existing_paths = persisted? ? paths : []
+				existing_paths = persisted? ? paths.to_a : []
 				
 				# Write data, check if any actual changes made:
 				object = dataset.append(self.dump)
 				return if object == @object
 				
 				existing_paths.each do |path|
-					dataset.delete(path) rescue warn "#{$!} while removing #{path}"
+					dataset.delete(path)
 				end
 				
 				paths do |path|
