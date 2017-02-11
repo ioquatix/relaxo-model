@@ -154,17 +154,21 @@ module Relaxo
 					return errors
 				end
 				
-				existing_paths = paths
+				existing_paths = persisted? ? paths : []
 				
 				# Write data, check if any actual changes made:
 				object = dataset.append(self.dump)
 				return if object == @object
 				
 				existing_paths.each do |path|
-					dataset.remove(path) rescue nil
+					dataset.delete(path) rescue warn "#{$!} while removing #{path}"
 				end
 				
 				paths do |path|
+					if dataset.exist?(path)
+						raise KeyError, "Dataset already contains path: #{path}"
+					end
+						
 					dataset.write(path, object)
 				end
 				
