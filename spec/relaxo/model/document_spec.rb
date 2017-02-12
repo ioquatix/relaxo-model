@@ -22,6 +22,8 @@ end
 class Invoice::Transaction
 	include Relaxo::Model
 	
+	parent_type Invoice
+	
 	property :id, UUID
 	property :invoice, BelongsTo[Invoice]
 	property :date, Attribute[Date]
