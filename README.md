@@ -16,7 +16,7 @@ Here is a simple example of a traditional ORM style model:
 
 	trees = [
 		{:name => 'Hinoki', :planted => Date.parse("1948/4/2")},
-		{:name => 'Rimu', :planted => Date.parse("1962/8/7")}
+		{:name => 'Keyaki', :planted => Date.parse("1962/8/7")}
 	]
 	
 	class Tree
@@ -25,28 +25,23 @@ Here is a simple example of a traditional ORM style model:
 		property :id, UUID
 		property :name
 		property :planted, Attribute[Date]
-	
-		# Ensure you've loaded an appropriate design document:
-		view :all, 'catalog/tree', Tree
+		
+		view :all, [:type], index: [:id]
 	end
 	
-	database.transaction("Create trees") do |dataset|
-		trees.each do |doc|
-			tree = Tree.create(dataset, doc)
-		
-			tree.save
+	database.commit(message: "Create trees") do |changeset|
+		trees.each do |tree|
+			Tree.insert(dataset, tree)
 		end
 	end
 	
-	database.head do |dataset|
+	database.current do |dataset|
 		Tree.all(dataset).each do |tree|
 			puts "A #{tree.name} was planted on #{tree.planted.to_s}."
 
 			# Expected output:
-			# => A Rimu was planted on 1962-08-07.
+			# => A Keyaki was planted on 1962-08-07.
 			# => A Hinoki was planted on 1948-04-02.
-		
-			tree.delete
 		end
 	end
 	
@@ -62,7 +57,7 @@ Here is a simple example of a traditional ORM style model:
 
 Released under the MIT license.
 
-Copyright, 2010-2013, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
+Copyright, 2017, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
