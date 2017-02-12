@@ -51,7 +51,7 @@ module Relaxo
 				end
 
 				def convert_from_primative(dataset, path)
-					type, id = path.split('/', 2)
+					type, _, _ = path.rpartition('/')
 					
 					klass = lookup(type)
 					

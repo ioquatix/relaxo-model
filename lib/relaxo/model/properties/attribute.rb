@@ -31,7 +31,7 @@ module Relaxo
 					@@attributes[klass] = Proc.new(&block)
 				end
 
-				def self.[] (klass, proc = nil)
+				def self.[](klass, proc = nil)
 					self.new(klass, &proc)
 				end
 
@@ -39,15 +39,15 @@ module Relaxo
 					@klass = klass
 
 					if block_given?
-						self.instance_eval &serialization
+						self.instance_eval(&serialization)
 					else
-						self.instance_eval &@@attributes[klass]
+						self.instance_eval(&@@attributes[klass])
 					end
 				end
 			end
 		
 			class Serialized
-				def self.[] (klass, proc = nil)
+				def self.[](klass, proc = nil)
 					self.new(klass, &proc)
 				end
 				
