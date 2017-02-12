@@ -15,10 +15,10 @@ Here is a simple example of a traditional ORM style model:
 	database = Relaxo.connect("test")
 
 	trees = [
-		{:name => 'Hinoki', :planted => Date.parse("1948/4/2")},
-		{:name => 'Keyaki', :planted => Date.parse("1962/8/7")}
+		{:name => 'Hinoki', :planted => Date.parse("2013/11/17")},
+		{:name => 'Keyaki', :planted => Date.parse("2016/9/24")}
 	]
-	
+
 	class Tree
 		include Relaxo::Model
 		
@@ -28,13 +28,13 @@ Here is a simple example of a traditional ORM style model:
 		
 		view :all, [:type], index: [:id]
 	end
-	
+
 	database.commit(message: "Create trees") do |changeset|
 		trees.each do |tree|
-			Tree.insert(dataset, tree)
+			Tree.insert(changeset, tree)
 		end
 	end
-	
+
 	database.current do |dataset|
 		Tree.all(dataset).each do |tree|
 			puts "A #{tree.name} was planted on #{tree.planted.to_s}."
