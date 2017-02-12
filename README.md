@@ -40,8 +40,8 @@ Here is a simple example of a traditional ORM style model:
 			puts "A #{tree.name} was planted on #{tree.planted.to_s}."
 
 			# Expected output:
-			# => A Keyaki was planted on 1962-08-07.
-			# => A Hinoki was planted on 1948-04-02.
+			# A Hinoki was planted on 2013-11-17.
+			# A Keyaki was planted on 2016-09-24.
 		end
 	end
 	
