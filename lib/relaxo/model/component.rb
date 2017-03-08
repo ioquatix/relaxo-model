@@ -44,6 +44,11 @@ module Relaxo
 				end
 			end
 			
+			def reload
+				@changed.clear
+				self.load_object
+			end
+			
 			def dump
 				flatten!
 				

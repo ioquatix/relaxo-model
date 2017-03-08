@@ -191,10 +191,6 @@ module Relaxo
 				return self
 			end
 
-			def reload(dataset)
-				@dataset = dataset
-			end
-
 			def before_delete
 			end
 
