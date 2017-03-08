@@ -117,7 +117,7 @@ RSpec.describe Relaxo::Model::Document do
 	end
 	
 	it "can query by index" do
-		database.commit(message: 'doot') do |changes|
+		database.commit(message: 'Adding new users.') do |changes|
 			User.insert(changes, email: 'john.doe@aol.com', name: 'John Doe')
 			User.insert(changes, email: 'jane.doe@aol.com', name: 'Jane Doe')
 		end
