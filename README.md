@@ -56,7 +56,7 @@ gem 'relaxo'
 
 require 'relaxo/model'
 
-database = Relaxo.connect("/tmp/test4")
+database = Relaxo.connect("test")
 
 trees = [
 		{:name => 'Hinoki', :planted => Date.parse("2013/11/17")},
