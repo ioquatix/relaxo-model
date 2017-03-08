@@ -33,6 +33,16 @@ class Invoice::Transaction
 	view :by_invoice, [:type, 'by_invoice', :invoice], index: [[:date, :id]]
 end
 
+class User
+	include Relaxo::Model
+	
+	property :email, Attribute[String]
+	property :name
+	property :intro
+	
+	view :all, [:type], index: [:email]
+end
+
 RSpec.describe Relaxo::Model::Document do
 	let(:database_path) {File.join(__dir__, 'test')}
 	let(:database) {Relaxo.connect(database_path)}
@@ -96,9 +106,22 @@ RSpec.describe Relaxo::Model::Document do
 			transaction.save(dataset)
 		end
 		
+		transactions = Invoice::Transaction.all(database.current)
+		
 		database.commit(message: "Adding test model") do |dataset|
 			transaction.date = Date.today - 1
 			transaction.save(dataset)
 		end
+		
+		transactions = Invoice::Transaction.all(database.current)
+	end
+	
+	it "can query by index" do
+		database.commit(message: 'doot') do |changes|
+			User.insert(changes, email: 'john.doe@aol.com', name: 'John Doe')
+			User.insert(changes, email: 'jane.doe@aol.com', name: 'Jane Doe')
+		end
+		
+		expect(User.fetch_all(database.current, email: 'john.doe@aol.com').name).to be == 'John Doe'
 	end
 end
