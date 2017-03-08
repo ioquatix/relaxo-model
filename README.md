@@ -72,11 +72,11 @@ class Tree
 		view :all, [:type], index: [:name]
 end
 
-# database.commit(message: "Create trees") do |changeset|
-# 		trees.each do |tree|
-# 				Tree.insert(changeset, tree)
-# 		end
-# end
+database.commit(message: "Create trees") do |changeset|
+		trees.each do |tree|
+				Tree.insert(changeset, tree)
+		end
+end
 
 database.current do |dataset|
 	trees.each do |tree|
