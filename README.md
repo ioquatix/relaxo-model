@@ -10,41 +10,82 @@ Relaxo Model provides a framework for business logic on top of Relaxo, a documen
 
 Here is a simple example of a traditional ORM style model:
 
-	require 'relaxo/model'
+```ruby
+require 'relaxo/model'
 
-	database = Relaxo.connect("test")
+database = Relaxo.connect("test")
 
-	trees = [
+trees = [
+	{:name => 'Hinoki', :planted => Date.parse("2013/11/17")},
+	{:name => 'Keyaki', :planted => Date.parse("2016/9/24")}
+]
+
+class Tree
+	include Relaxo::Model
+	
+	property :id, UUID
+	property :name
+	property :planted, Attribute[Date]
+	
+	view :all, [:type], index: [:id]
+end
+
+database.commit(message: "Create trees") do |changeset|
+	trees.each do |tree|
+		Tree.insert(changeset, tree)
+	end
+end
+
+database.current do |dataset|
+	Tree.all(dataset).each do |tree|
+		puts "A #{tree.name} was planted on #{tree.planted.to_s}."
+
+		# Expected output:
+		# A Hinoki was planted on 2013-11-17.
+		# A Keyaki was planted on 2016-09-24.
+	end
+end
+```
+
+### Non-UUID Primary Key
+
+```ruby
+#!/usr/bin/env ruby
+
+gem 'relaxo'
+
+require 'relaxo/model'
+
+database = Relaxo.connect("/tmp/test4")
+
+trees = [
 		{:name => 'Hinoki', :planted => Date.parse("2013/11/17")},
 		{:name => 'Keyaki', :planted => Date.parse("2016/9/24")}
-	]
+]
 
-	class Tree
+class Tree
 		include Relaxo::Model
-		
-		property :id, UUID
+
 		property :name
 		property :planted, Attribute[Date]
-		
-		view :all, [:type], index: [:id]
-	end
 
-	database.commit(message: "Create trees") do |changeset|
-		trees.each do |tree|
-			Tree.insert(changeset, tree)
-		end
-	end
+		view :all, [:type], index: [:name]
+end
 
-	database.current do |dataset|
-		Tree.all(dataset).each do |tree|
-			puts "A #{tree.name} was planted on #{tree.planted.to_s}."
+# database.commit(message: "Create trees") do |changeset|
+# 		trees.each do |tree|
+# 				Tree.insert(changeset, tree)
+# 		end
+# end
 
-			# Expected output:
-			# A Hinoki was planted on 2013-11-17.
-			# A Keyaki was planted on 2016-09-24.
-		end
+database.current do |dataset|
+	trees.each do |tree|
+		object = Tree.fetch_all(dataset, name: tree[:name])
+		puts object
 	end
-	
+end
+```
+
 ## Contributing
 
 1. Fork it
