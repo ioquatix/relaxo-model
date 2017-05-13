@@ -29,9 +29,9 @@ module Relaxo
 				@model = model
 			end
 		
-			attr :klass
-			attr :database
-			attr :view
+			attr :dataset
+			attr :path
+			attr :model
 			
 			def empty?
 				!@dataset.each(@path).any?
