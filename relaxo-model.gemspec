@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 	spec.email         = ["samuel.williams@oriontransfer.co.nz"]
 	spec.description   = <<-EOF
 		Relaxo Model provides a framework for business logic on top of
-		Relaxo/CouchDB. While it supports some traditional ORM style patterns, it is
+		Relaxo. While it supports some traditional ORM style patterns, it is
 		primary focus is to model business processes and logic.
 	EOF
 	spec.summary       = "A model layer for CouchDB with minimal global state."
