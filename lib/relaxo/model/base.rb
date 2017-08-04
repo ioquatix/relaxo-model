@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 require_relative 'recordset'
+require 'uri'
 
 module Relaxo
 	module Model
@@ -39,11 +40,19 @@ module Relaxo
 			end
 			
 			def object_path(model, **arguments)
-				resolve(self.prefix + self.index, model, **arguments).join('/')
+				encode resolve(self.prefix + self.index, model, **arguments)
 			end
 			
 			def prefix_path(model, **arguments)
-				resolve(self.prefix, model, **arguments).join('/')
+				encode resolve(self.prefix, model, **arguments)
+			end
+			
+			private
+			
+			ENCODE = {'/' => '%2F', '%' => '%25'}
+			
+			def encode(path)
+				path.collect{|part| part.to_s.gsub(/[\/%]/, ENCODE)}.join('/')
 			end
 		end
 		

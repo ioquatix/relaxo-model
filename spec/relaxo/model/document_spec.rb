@@ -41,6 +41,8 @@ class User
 	property :intro
 	
 	view :all, [:type], index: [:email]
+	
+	view :by_name, [:type, 'by_name'], index: [:name]
 end
 
 RSpec.describe Relaxo::Model::Document do
@@ -123,5 +125,21 @@ RSpec.describe Relaxo::Model::Document do
 		end
 		
 		expect(User.fetch_all(database.current, email: 'john.doe@aol.com').name).to be == 'John Doe'
+	end
+	
+	it "can handle indexes with reserved characters" do
+		database.commit(message: "Add new user") do |changeset|
+			User.insert(changeset, email: "its@complicated.com", name: "/John/James/")
+		end
+		
+		expect(User.fetch_all(database.current, email: 'its@complicated.com').name).to be == '/John/James/'
+	end
+	
+	it "can handle indexes with unicode" do
+		database.commit(message: "Add new user") do |changeset|
+			User.insert(changeset, email: "its@complicated.com", name: "こんにちは")
+		end
+		
+		expect(User.fetch_by_name(database.current, name: "こんにちは")).to_not be nil
 	end
 end
