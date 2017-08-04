@@ -203,7 +203,7 @@ module Relaxo
 				@changed.clear
 				
 				paths.each do |path|
-					@dataset.delete(path)
+					dataset.delete(path)
 				end
 
 				after_delete
