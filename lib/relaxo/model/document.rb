@@ -217,9 +217,17 @@ module Relaxo
 			def after_create
 			end
 			
-			# Equality is done only on id
+			# Equality is done only on id to improve performance.
 			def <=> other
 				self.id <=> other.id if other
+			end
+			
+			def eql? other
+				self.id.eql?(other.id) if other
+			end
+			
+			def hash
+				self.id.hash
 			end
 			
 			def empty?
