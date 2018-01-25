@@ -106,6 +106,10 @@ module Relaxo
 			end
 			
 			def property(name, klass = nil)
+				if @properties.key? name
+					raise ArgumentError.new("Property #{name.inspect} already defined!")
+				end
+				
 				@properties[name] = klass
 
 				self.send(:define_method, name) do
