@@ -78,6 +78,10 @@ RSpec.describe Relaxo::Model::Document do
 		expect(Invoice.all(database.current).count).to be == 3
 	end
 	
+	it "should have resolved type" do
+		expect(Invoice::Transaction.type).to be_a Relaxo::Model::Path
+	end
+	
 	it "should create model indexes" do
 		database.commit(message: "Adding test model") do |dataset|
 			invoice = Invoice.create(dataset, name: "Software Development")
@@ -94,7 +98,11 @@ RSpec.describe Relaxo::Model::Document do
 		expect(invoice).to_not be nil
 		
 		transactions = Invoice::Transaction.by_invoice(database.current, invoice: invoice)
+		expect(transactions.path).to be == "invoice/transaction/by_invoice/invoice/#{invoice.id}"
 		expect(transactions).to_not be_empty
+		
+		transaction = transactions.first
+		expect(transaction.to_s).to be == "invoice/transaction/#{transaction.id}"
 	end
 	
 	it "updates indexes correctly" do

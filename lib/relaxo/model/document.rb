@@ -105,7 +105,7 @@ module Relaxo
 			end
 
 			def type
-				@attributes[:type]
+				Path.new @attributes[:type]
 			end
 
 			def valid_type?

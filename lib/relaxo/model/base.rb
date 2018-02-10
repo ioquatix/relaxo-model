@@ -23,12 +23,39 @@ require 'uri'
 
 module Relaxo
 	module Model
+		# A string that won't be escaped when concatenating with a path:
+		class Path < String
+			ENCODE = {'/' => '%2F', '%' => '%25'}
+			
+			def to_s
+				self
+			end
+			
+			def to_str
+				self
+			end
+			
+			def self.join(path)
+				joined_path = path.map do |part|
+					part = part.to_s
+					
+					if part.is_a? Path
+						part
+					else
+						part.to_s.gsub(/[\/%]/, ENCODE)
+					end
+				end.join('/')
+				
+				return self.new(joined_path)
+			end
+		end
+		
 		Key = Struct.new(:prefix, :index) do
 			def resolve(key_path, model, **arguments)
 				key_path.collect do |component|
 					case component
 					when Symbol
-						arguments[component] || model.send(component) || "null"
+						arguments[component] || model.send(component) || 'null'
 					when Array
 						resolve(component, model, arguments).join('-')
 					when Proc
@@ -40,19 +67,11 @@ module Relaxo
 			end
 			
 			def object_path(model, **arguments)
-				encode resolve(self.prefix + self.index, model, **arguments)
+				Path.join resolve(self.prefix + self.index, model, **arguments)
 			end
 			
 			def prefix_path(model, **arguments)
-				encode resolve(self.prefix, model, **arguments)
-			end
-			
-			private
-			
-			ENCODE = {'/' => '%2F', '%' => '%25'}
-			
-			def encode(path)
-				path.collect{|part| part.to_s.gsub(/[\/%]/, ENCODE)}.join('/')
+				Path.join resolve(self.prefix, model, **arguments)
 			end
 		end
 		
@@ -81,7 +100,7 @@ module Relaxo
 			attr :primary_key
 			
 			def parent_type klass
-				@type = [klass.type, self.type].join('/')
+				@type = Path.join([klass.type, self.type])
 			end
 			
 			def view(name, path = nil, klass: self, index: nil)
