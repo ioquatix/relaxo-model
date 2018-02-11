@@ -28,9 +28,14 @@ class Invoice::Transaction
 	property :invoice, BelongsTo[Invoice]
 	property :date, Attribute[Date]
 	
+	def year
+		date.year
+	end
+	
 	view :all, :type, index: :id
 	
 	view :by_invoice, index: unique(:date, :id)
+	view :by_year, :type, 'by_year', index: unique(:year)
 end
 
 class User

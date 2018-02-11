@@ -108,7 +108,7 @@ module Relaxo
 			
 			def unique(*keys)
 				lambda do |arguments|
-					Path.escape keys.map{|key| arguments[key] || self[key] || 'null'}
+					Path.escape keys.map{|key| arguments[key] || self.send(key) || 'null'}
 				end
 			end
 			
