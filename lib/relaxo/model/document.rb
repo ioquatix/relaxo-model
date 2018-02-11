@@ -226,6 +226,10 @@ module Relaxo
 				self.id.eql?(other.id) if other
 			end
 			
+			def == other
+				self.attributes == other.attributes if other
+			end
+			
 			def hash
 				self.id.hash
 			end
