@@ -19,43 +19,14 @@
 # THE SOFTWARE.
 
 require_relative 'recordset'
-require 'uri'
+require_relative 'path'
 
 module Relaxo
 	module Model
-		# A string that won't be escaped when concatenating with a path:
-		class Path < String
-			ENCODE = {'/' => '%2F', '%' => '%25'}
-			
-			def to_s
-				self
-			end
-			
-			def to_str
-				self
-			end
-			
-			def self.join(path)
-				joined_path = path.map do |part|
-					part = part.to_s
-					
-					if part.is_a? Path
-						part
-					else
-						part.to_s.gsub(/[\/%]/, ENCODE)
-					end
-				end.join('/')
-				
-				return self.new(joined_path)
-			end
-		end
-		
 		Key = Struct.new(:prefix, :index) do
 			def resolve(key_path, model, **arguments)
 				key_path.collect do |component|
 					case component
-					when :type
-						model.type
 					when Symbol
 						arguments[component] || model.send(component) || 'null'
 					when Array
@@ -69,11 +40,11 @@ module Relaxo
 			end
 			
 			def object_path(model, **arguments)
-				Path.join resolve(self.prefix + self.index, model, **arguments)
+				resolve(self.prefix + self.index, model, **arguments).join('/')
 			end
 			
 			def prefix_path(model, **arguments)
-				Path.join resolve(self.prefix, model, **arguments)
+				resolve(self.prefix, model, **arguments).join('/')
 			end
 		end
 		
@@ -102,11 +73,20 @@ module Relaxo
 			attr :primary_key
 			
 			def parent_type klass
-				@type = Path.join([klass.type, self.type])
+				@type = [klass.type, self.type].join('/')
 			end
 			
-			def view(name, path = nil, klass: self, index: nil)
-				key = Key.new(path, index)
+			def view(name, *path, klass: self, index: nil)
+				# Support array as 2nd argument, e.g.
+				# view :by_owner, [:type, 'by_owner', ]
+				if path.empty?
+					path = [:type, name.to_s, name.to_s.split('_', 2).last.to_sym]
+				elsif path.count == 1 and path.first.is_a? Array
+					warn "Legacy view for #{self}: #{name} -> #{path}"
+					path = path.first
+				end
+				
+				key = Key.new(path, Array(index))
 				
 				if index
 					@keys[name] = key
@@ -123,6 +103,12 @@ module Relaxo
 				
 				self.send(:define_method, name) do |**arguments|
 					Recordset.new(self.dataset, key.object_path(self, **arguments), self.class)
+				end
+			end
+			
+			def unique(*keys)
+				lambda do |arguments|
+					Path.escape keys.map{|key| arguments[key] || self[key] || 'null'}
 				end
 			end
 			

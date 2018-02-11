@@ -29,13 +29,17 @@ RSpec.describe Relaxo::Model::Document do
 		expect(Invoice.all(database.current).count).to be == 3
 	end
 	
+	it "should have valid type" do
+		expect(Invoice.type).to be == "invoice"
+		expect(Invoice::Transaction.type).to be == "invoice/transaction"
+	end
+	
 	it "should have resolved type" do
-		expect(Invoice::Transaction.type).to be_a Relaxo::Model::Path
-		
 		transaction = Invoice::Transaction.create(database.current, {id: 'test'})
-		transaction.attributes[:type] = 'invoice/transaction'
 		
-		expect(transaction.paths.first).to be == "invoice/transaction/test"
+		transaction.attributes[:type] = ["Invoice", "Transaction"]
+		
+		expect(transaction.paths.first).to be == "Invoice/Transaction/test"
 	end
 	
 	it "should create model indexes" do

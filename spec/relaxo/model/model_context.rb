@@ -12,7 +12,7 @@ class Invoice
 	
 	property :date, Attribute[Date]
 	
-	view :all, [:type], index: [:id]
+	view :all, :type, index: :id
 	
 	def transactions
 		Invoice::Transaction.by_invoice(@dataset, invoice: self)
@@ -28,9 +28,9 @@ class Invoice::Transaction
 	property :invoice, BelongsTo[Invoice]
 	property :date, Attribute[Date]
 	
-	view :all, [:type], index: [:id]
+	view :all, :type, index: :id
 	
-	view :by_invoice, [:type, 'by_invoice', :invoice], index: [[:date, :id]]
+	view :by_invoice, index: unique(:date, :id)
 end
 
 class User
@@ -40,9 +40,9 @@ class User
 	property :name
 	property :intro
 	
-	view :all, [:type], index: [:email]
+	view :all, :type, index: unique(:email)
 	
-	view :by_name, [:type, 'by_name'], index: [:name]
+	view :by_name, :type, 'by_name', index: unique(:name)
 end
 
 RSpec.shared_context "model" do

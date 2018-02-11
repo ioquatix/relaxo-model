@@ -105,7 +105,7 @@ module Relaxo
 			end
 
 			def type
-				Path.new @attributes[:type]
+				@attributes[:type]
 			end
 
 			def valid_type?
@@ -119,6 +119,7 @@ module Relaxo
 			def after_save
 			end
 
+			# The canonical path to the object in the data store, assuming there is some unique way to identify the object.
 			def to_s
 				if primary_key = self.class.primary_key
 					primary_key.object_path(self)

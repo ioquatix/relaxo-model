@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Samuel G. D. Williams. <http://www.oriontransfer.co.nz>
+# Copyright, 2018, by Samuel G. D. Williams. <https://www.codeotaku.com/>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,31 @@
 
 module Relaxo
 	module Model
-		VERSION = "0.12.0"
+		# A string that won't be escaped when concatenating with a path:
+		class Path < String
+			ENCODE = {'/' => '%2F', '%' => '%25'}
+			
+			def to_s
+				self
+			end
+			
+			def to_str
+				self
+			end
+			
+			def self.escape(values)
+				escaped_path = values.map do |part|
+					part = part.to_s
+					
+					if part.is_a? Path
+						part
+					else
+						part.to_s.gsub(/[\/%]/, ENCODE)
+					end
+				end.join('-')
+				
+				return self.new(escaped_path)
+			end
+		end
 	end
 end
