@@ -37,6 +37,14 @@ module Relaxo
 				!@dataset.each(@path).any?
 			end
 			
+			def first
+				to_a.first
+			end
+			
+			def last
+				to_a.last
+			end
+			
 			def each(model = @model, &block)
 				@dataset.each(@path) do |name, object|
 					object = model.new(@dataset, object)
