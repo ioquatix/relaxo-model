@@ -54,6 +54,8 @@ module Relaxo
 			def resolve(key_path, model, **arguments)
 				key_path.collect do |component|
 					case component
+					when :type
+						model.type
 					when Symbol
 						arguments[component] || model.send(component) || 'null'
 					when Array

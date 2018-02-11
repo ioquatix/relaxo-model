@@ -31,6 +31,11 @@ RSpec.describe Relaxo::Model::Document do
 	
 	it "should have resolved type" do
 		expect(Invoice::Transaction.type).to be_a Relaxo::Model::Path
+		
+		transaction = Invoice::Transaction.create(database.current, {id: 'test'})
+		transaction.attributes[:type] = 'invoice/transaction'
+		
+		expect(transaction.paths.first).to be == "invoice/transaction/test"
 	end
 	
 	it "should create model indexes" do
@@ -54,6 +59,26 @@ RSpec.describe Relaxo::Model::Document do
 		
 		transaction = transactions.first
 		expect(transaction.to_s).to be == "invoice/transaction/#{transaction.id}"
+	end
+	
+	it "can edit model objects" do
+		invoice = nil
+		
+		database.commit(message: "Adding test model") do |dataset|
+			invoice = Invoice.create(dataset, name: "Software Development")
+			invoice.save(dataset)
+		end
+		
+		# Fetch the invoice from the database:
+		invoice = Invoice.fetch_all(database.current, id: invoice.id)
+		invoice.name = "Software Engineering"
+		
+		database.commit(message: "Editing test model") do |dataset|
+			invoice.save(dataset)
+		end
+		
+		invoice = Invoice.fetch_all(database.current, id: invoice.id)
+		expect(invoice.name).to be == "Software Engineering"
 	end
 	
 	it "updates indexes correctly" do

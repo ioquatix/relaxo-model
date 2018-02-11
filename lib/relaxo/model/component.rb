@@ -22,6 +22,7 @@ require 'relaxo/model/base'
 
 module Relaxo
 	module Model
+		# Represents an underlying object with changes which can be persisted.
 		module Component
 			def self.included(child)
 				# $stderr.puts "#{self} included -> #{child} extend Base"
@@ -30,35 +31,31 @@ module Relaxo
 			
 			def initialize(dataset, object = nil, changed = {}, **attributes)
 				@dataset = dataset
+				
+				# The object from the dataset:
 				@object = object
-				@changed = changed
+				
+				# Underlying attributes from the dataset:
 				@attributes = attributes
+				
+				# Contains non-primitve attributes and changes:
+				@changed = changed
 			end
 			
-			def load_object
-				if @object
-					attributes = MessagePack.load(@object.data, symbolize_keys: true)
-					
-					# We prefer existing @attributes over ones loaded from data. This allows the API to load from an object, but specify new attributes.
-					@attributes = attributes.merge(@attributes)
-				end
-			end
+			# The dataset this document is currently bound to:
+			attr :dataset
+			
+			# The attributes specified/loaded from the dataset:
+			attr :attributes
+			
+			# Attributes that have been changed or de-serialized from the dataset:
+			attr :changed
 			
 			def reload
 				@changed.clear
 				self.load_object
 			end
 			
-			def dump
-				flatten!
-				
-				MessagePack.dump(@attributes)
-			end
-
-			attr :attributes
-			attr :dataset
-			attr :changed
-
 			def clear(key)
 				@changed.delete(key)
 				@attributes.delete(key)
@@ -108,9 +105,31 @@ module Relaxo
 			def validate
 				# Do nothing :)
 			end
-
+			
+			def to_hash
+				@attributes
+			end
+			
+			def load_object
+				if @object
+					attributes = MessagePack.load(@object.data, symbolize_keys: true)
+					
+					# We prefer existing @attributes over ones loaded from data. This allows the API to load from an object, but specify new attributes.
+					@attributes = attributes.merge(@attributes)
+				end
+			end
+			
+			protected
+			
+			# Flatten all changes and return a serialized version of the object.
+			def dump
+				flatten!
+				
+				MessagePack.dump(@attributes)
+			end
+			
+			# Moves values from `@changed` into `@attributes`.
 			def flatten!
-				# Flatten changed properties:
 				self.class.properties.each do |key, klass|
 					if @changed.include?(key)
 						if klass
@@ -129,10 +148,6 @@ module Relaxo
 				end
 
 				@changed = {}
-			end
-			
-			def to_hash
-				@attributes
 			end
 		end
 	end
