@@ -7,9 +7,9 @@ RSpec.describe Relaxo::Model::Recordset do
 	context "with several invoices" do
 		before(:each) do
 			database.commit(message: "Adding test model") do |dataset|
-				@first = Invoice.insert(dataset, name: "Software Development")
-				@middle = Invoice.insert(dataset, name: "Website Hosting")
-				@last = Invoice.insert(dataset, name: "Backup Services")
+				@first = Invoice.insert(dataset, id: "a", name: "Software Development")
+				@middle = Invoice.insert(dataset, id: "b", name: "Website Hosting")
+				@last = Invoice.insert(dataset, id: "c", name: "Backup Services")
 			end
 		end
 		
