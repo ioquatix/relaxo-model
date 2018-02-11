@@ -127,6 +127,10 @@ module Relaxo
 				end
 			end
 
+			def inspect
+				"\#<#{self.class}:#{self.id} #{self.attributes.inspect}>"
+			end
+
 			# Duplicate the model object, and possibly change the dataset it is connected to. You will potentially have two objects referring to the same record.
 			def dup
 				clone = self.class.new(@dataset, @object, @changed, **@attributes.dup)
