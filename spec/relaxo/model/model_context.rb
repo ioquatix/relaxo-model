@@ -1,6 +1,8 @@
 
 require 'relaxo/model'
 
+require 'relaxo/model/properties/bcrypt'
+
 class Invoice
 	class Transaction; end
 	
@@ -43,6 +45,7 @@ class User
 	
 	property :email, Attribute[String]
 	property :name
+	property :password, Attribute[BCrypt::Password]
 	property :intro
 	
 	view :all, :type, index: unique(:email)

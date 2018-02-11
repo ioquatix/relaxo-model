@@ -29,7 +29,7 @@ module Relaxo
 				end
 
 				def convert_from_primative(dataset, value)
-					if Array === value
+					if value.is_a? Array
 						@klass.new(value[0], value[1])
 					else
 						@klass.parse(value)

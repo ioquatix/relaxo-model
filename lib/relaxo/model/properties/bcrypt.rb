@@ -25,16 +25,22 @@ module Relaxo
 		module Properties
 			Attribute.for_class(BCrypt::Password) do
 				def convert_to_primative(value)
+					unless value.is_a? BCrypt::Password
+						value = BCrypt::Password.create(value)
+					end
+					
 					[value.salt, value.checksum]
 				end
 
 				def convert_from_primative(dataset, value)
-					if String === value
-						# If the primative value is a string, we are saving the password:
-						BCrypt::Password.create(value)
-					else
-						# Otherwise the password is given by an array containing the salt and checksum:
+					if value.is_a? Array
+						# The password is given by an array containing the salt and checksum:
 						BCrypt::Password.new(value.join)
+					elsif BCrypt::Password.valid_hash?(value)
+						BCrypt::Password.new(value)
+					else
+						# Try to create a password from the supplied value:
+						BCrypt::Password.create(value)
 					end
 				end
 			end
