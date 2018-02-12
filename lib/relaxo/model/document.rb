@@ -132,11 +132,12 @@ module Relaxo
 				"\#<#{self.class}:#{self.id} #{self.attributes.inspect}>"
 			end
 
-			# Duplicate the model object, and possibly change the dataset it is connected to. You will potentially have two objects referring to the same record.
+			# Make a copy of the record, as if calling create.
 			def dup
-				clone = self.class.new(@dataset, @object, @changed, **@attributes.dup)
+				# Splat already calls dup internally I guess.
+				clone = self.class.new(@dataset, nil, @changed.dup, **@attributes)
 				
-				clone.after_fetch
+				clone.after_create
 				
 				return clone
 			end

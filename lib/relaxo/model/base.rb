@@ -78,7 +78,7 @@ module Relaxo
 			
 			def view(name, *path, klass: self, index: nil)
 				# Support array as 2nd argument, e.g.
-				# view :by_owner, [:type, 'by_owner', ]
+				# view :by_owner, [:type, 'by_owner', ...]
 				if path.empty?
 					path = [:type, name.to_s, name.to_s.split('_', 2).last.to_sym]
 				elsif path.count == 1 and path.first.is_a? Array
