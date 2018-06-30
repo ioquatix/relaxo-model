@@ -22,6 +22,9 @@ require 'relaxo/model/base'
 
 module Relaxo
 	module Model
+		class SerializationError < RuntimeError
+		end
+		
 		# Represents an underlying object with changes which can be persisted.
 		module Component
 			def self.included(child)
@@ -131,14 +134,18 @@ module Relaxo
 			# Moves values from `@changed` into `@attributes`.
 			def flatten!
 				self.class.properties.each do |key, klass|
-					if @changed.include?(key)
-						if klass
-							@attributes[key] = klass.convert_to_primative(@changed.delete(key))
-						else
-							@attributes[key] = @changed.delete(key)
+					begin
+						if @changed.include?(key)
+							if klass
+								@attributes[key] = klass.convert_to_primative(@changed.delete(key))
+							else
+								@attributes[key] = @changed.delete(key)
+							end
+						elsif !@attributes.include?(key) and klass.respond_to?(:default)
+							@attributes[key] = klass.default
 						end
-					elsif !@attributes.include?(key) and klass.respond_to?(:default)
-						@attributes[key] = klass.default
+					rescue
+						raise SerializationError, "Failed to flatten #{key.inspect} of type #{klass.inspect}!"
 					end
 				end
 
