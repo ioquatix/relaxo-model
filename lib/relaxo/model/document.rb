@@ -133,9 +133,9 @@ module Relaxo
 			end
 
 			# Make a copy of the record, as if calling create.
-			def dup
+			def dup(dataset = @dataset)
 				# Splat already calls dup internally I guess.
-				clone = self.class.new(@dataset, nil, @changed.dup, **@attributes)
+				clone = self.class.new(dataset, nil, @changed.dup, **@attributes)
 				
 				clone.after_create
 				
