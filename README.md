@@ -59,23 +59,23 @@ require 'relaxo/model'
 database = Relaxo.connect("test")
 
 trees = [
-		{:name => 'Hinoki', :planted => Date.parse("2013/11/17")},
-		{:name => 'Keyaki', :planted => Date.parse("2016/9/24")}
+	{:name => 'Hinoki', :planted => Date.parse("2013/11/17")},
+	{:name => 'Keyaki', :planted => Date.parse("2016/9/24")}
 ]
 
 class Tree
-		include Relaxo::Model
+	include Relaxo::Model
 
-		property :name
-		property :planted, Attribute[Date]
+	property :name
+	property :planted, Attribute[Date]
 
-		view :all, [:type], index: [:name]
+	view :all, [:type], index: [:name]
 end
 
 database.commit(message: "Create trees") do |changeset|
-		trees.each do |tree|
-				Tree.insert(changeset, tree)
-		end
+	trees.each do |tree|
+		Tree.insert(changeset, tree)
+	end
 end
 
 database.current do |dataset|
