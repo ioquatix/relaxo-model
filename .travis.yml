@@ -1,17 +1,20 @@
 language: ruby
-sudo: false
-before_install:
-  # For testing purposes:
-  - git config --global user.name "Samuel Williams"
-  - git config --global user.email "samuel@oriontransfer.net"
-rvm:
-  - 2.1.8
-  - 2.2.4
-  - 2.3.1
-  - 2.4.0
-  - rbx-2
-env: COVERAGE=true
+dist: xenial
+cache: bundler
+
 matrix:
-  allow_failures:
+  include:
+    - rvm: 2.4
+    - rvm: 2.5
+    - rvm: 2.6
+    - rvm: 2.6
+      env: COVERAGE=Summary,Coveralls
+    - rvm: truffleruby
     - rvm: ruby-head
-    - rvm: "rbx-2"
+    - rvm: 2.6
+      os: osx
+  allow_failures:
+    - rvm: truffleruby
+    - rvm: ruby-head
+    - rvm: jruby-head
+    - rvm: truffleruby
