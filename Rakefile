@@ -1,11 +1,8 @@
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 
-RSpec::Core::RakeTask.new(:spec) do |task|
-	task.rspec_opts = ["--require", "simplecov"] if ENV['COVERAGE']
-end
-
-task :default => :spec
+# For RSpec
+RSpec::Core::RakeTask.new(:spec)
 
 task :console do
 	require 'pry'
@@ -16,3 +13,5 @@ task :console do
 	
 	Pry.start
 end
+
+task :default => :spec
