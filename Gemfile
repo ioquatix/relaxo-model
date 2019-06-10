@@ -9,8 +9,3 @@ group :development do
 	gem "pry"
 	gem "bcrypt"
 end
-
-group :test do
-	gem 'simplecov'
-	gem 'coveralls', require: false
-end
