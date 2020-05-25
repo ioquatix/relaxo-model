@@ -24,7 +24,7 @@ require 'msgpack'
 
 module Relaxo
 	module Model
-		class ValidationError < StandardError
+		class ValidationFailure < StandardError
 			def initialize(document, errors)
 				@document = document
 				@errors = errors
@@ -157,7 +157,7 @@ module Relaxo
 				
 				before_save
 				
-				if errors = self.validate
+				if errors = self.validate(dataset)
 					return errors
 				end
 				
@@ -191,7 +191,7 @@ module Relaxo
 				result = self.save(dataset)
 				
 				if result != true
-					raise ValidationErrors.new(result)
+					raise ValidationFailure.new(self, result)
 				end
 				
 				return self

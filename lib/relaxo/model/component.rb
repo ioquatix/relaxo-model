@@ -105,7 +105,7 @@ module Relaxo
 				end
 			end
 
-			def validate
+			def validate(changeset)
 				# Do nothing :)
 			end
 			
