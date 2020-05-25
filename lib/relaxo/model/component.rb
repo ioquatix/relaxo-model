@@ -109,7 +109,7 @@ module Relaxo
 				# Do nothing :)
 			end
 			
-			def to_hash
+			def to_h
 				@attributes
 			end
 			
