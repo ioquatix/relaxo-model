@@ -54,7 +54,8 @@ module Relaxo
 			# Attributes that have been changed or de-serialized from the dataset:
 			attr :changed
 			
-			def reload
+			def reload(dataset = @dataset)
+				@dataset = dataset
 				@changed.clear
 				self.load_object
 			end
