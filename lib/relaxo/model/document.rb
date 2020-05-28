@@ -79,7 +79,7 @@ module Relaxo
 				# Fetch a record or create a model object from a hash of attributes.
 				def fetch(dataset, path = nil, **attributes)
 					if path and object = dataset.read(path)
-						instance = self.new(dataset, object, attributes)
+						instance = self.new(dataset, object, **attributes)
 						
 						instance.load_object
 						
@@ -147,7 +147,7 @@ module Relaxo
 				
 				self.class.keys.each do |name, key|
 					# @attributes is not modified until we call self.dump (which flattens @attributes into @changes). When we generate paths, we want to ensure these are done based on the non-mutable state of the object.
-					yield key.object_path(self, @attributes)
+					yield key.object_path(self, **@attributes)
 				end
 			end
 
