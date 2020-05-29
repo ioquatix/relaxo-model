@@ -42,6 +42,8 @@ RSpec.describe Relaxo::Model::Document do
 			hash_value: {x: 10, y: 20}
 		)
 		
+		expect(model).to be_changed(:array_value)
+		
 		database.commit(message: "Adding test model") do |dataset|
 			model.save(dataset)
 		end

@@ -100,10 +100,6 @@ module Relaxo
 				@object != nil
 			end
 			
-			def changed? key
-				@changed.include? key.to_s
-			end
-
 			def type
 				@attributes[:type]
 			end

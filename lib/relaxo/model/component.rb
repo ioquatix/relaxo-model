@@ -54,6 +54,10 @@ module Relaxo
 			# Attributes that have been changed or de-serialized from the dataset:
 			attr :changed
 			
+			def changed?(key)
+				@changed.include?(key)
+			end
+			
 			def reload(dataset = @dataset)
 				@dataset = dataset
 				@changed.clear
