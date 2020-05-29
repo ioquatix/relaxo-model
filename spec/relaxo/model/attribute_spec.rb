@@ -29,7 +29,7 @@ class Aggregate
 end
 
 RSpec.describe Relaxo::Model::Document do
-	let(:database_path) {File.join(__dir__, 'test')}
+	let(:database_path) {'tmp/attributes'}
 	let(:database) {Relaxo.connect(database_path)}
 	
 	let(:document_path) {'test/document.json'}

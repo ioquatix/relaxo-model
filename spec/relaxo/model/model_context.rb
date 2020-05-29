@@ -72,7 +72,7 @@ class User
 end
 
 RSpec.shared_context "model" do
-	let(:database_path) {File.join(__dir__, 'test')}
+	let(:database_path) {'tmp/model'}
 	let(:database) {Relaxo.connect(database_path)}
 	
 	let(:document_path) {'test/document.json'}
