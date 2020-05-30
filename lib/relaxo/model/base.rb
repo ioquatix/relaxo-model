@@ -120,9 +120,9 @@ module Relaxo
 				@properties[name] = klass
 
 				self.send(:define_method, name) do
-					if @changed.include? name
+					if @changed.include?(name)
 						return @changed[name]
-					elsif @attributes.include? name
+					elsif @attributes.include?(name)
 						if klass
 							value = @attributes[name]
 
