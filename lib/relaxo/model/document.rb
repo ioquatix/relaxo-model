@@ -109,7 +109,7 @@ module Relaxo
 			end
 
 			# Update any calculations:
-			def before_save
+			def before_save(changeset)
 			end
 
 			def after_save
@@ -148,34 +148,34 @@ module Relaxo
 			end
 
 			# Save the model object.
-			def save(dataset)
+			def save(changeset)
+				before_save(changeset)
+				
 				return if persisted? and @changed.empty?
 				
-				before_save
-				
-				if errors = self.validate(dataset)
+				if errors = self.validate(changeset)
 					return errors
 				end
 				
 				existing_paths = persisted? ? paths.to_a : []
 				
 				# Write data, check if any actual changes made:
-				object = dataset.append(self.dump)
+				object = changeset.append(self.dump)
 				return if object == @object
 				
 				existing_paths.each do |path|
-					dataset.delete(path)
+					changeset.delete(path)
 				end
 				
 				paths do |path|
-					if dataset.exist?(path)
+					if changeset.exist?(path)
 						raise KeyError, "Dataset already contains path: #{path}, when inserting #{@attributes.inspect}"
 					end
 						
-					dataset.write(path, object)
+					changeset.write(path, object)
 				end
 				
-				@dataset = dataset
+				@dataset = changeset
 				@object = object
 				
 				after_save
@@ -183,8 +183,8 @@ module Relaxo
 				return true
 			end
 
-			def save!(dataset)
-				result = self.save(dataset)
+			def save!(changeset)
+				result = self.save(changeset)
 				
 				if result != true
 					raise ValidationFailure.new(self, result)
@@ -199,13 +199,13 @@ module Relaxo
 			def after_delete
 			end
 
-			def delete(dataset)
+			def delete(changeset)
 				before_delete
 				
 				@changed.clear
 				
 				paths.each do |path|
-					dataset.delete(path)
+					changeset.delete(path)
 				end
 
 				after_delete
