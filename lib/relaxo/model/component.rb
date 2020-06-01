@@ -68,32 +68,32 @@ module Relaxo
 				@changed.delete(key)
 				@attributes.delete(key)
 			end
-
-			def assign(primative_attributes, only = :all)
-				enumerator = primative_attributes
-
-				if only == :all
-					enumerator = enumerator.select{|key, value| self.class.properties.include? key.to_sym}
-				elsif only.respond_to? :include?
-					enumerator = enumerator.select{|key, value| only.include? key.to_sym}
-				end
-
-				enumerator.each do |key, value|
+			
+			ALL = Hash.new(true)
+			
+			def assign(primative_attributes, only = ALL)
+				primative_attributes.each do |key, value|
 					key = key.to_sym
-
-					klass = self.class.properties[key]
-
-					if klass
-						# This might raise a validation error
-						value = klass.convert_from_primative(@dataset, value)
+					case mapping = only[key]
+					when true
+						# Assign from primitive value:
+						if klass = self.class.properties[key]
+							value = klass.convert_from_primative(@dataset, value)
+						end
+						
+						self[key] = value
+					when false, nil
+						# Ignore:
+						next
+					else
+						# Nested assignment:
+						self[key].assign(value, mapping)
 					end
-
-					self[key] = value
 				end
 				
 				return self
 			end
-
+			
 			def [] name
 				if self.class.properties.include? name
 					self.send(name)
@@ -101,7 +101,7 @@ module Relaxo
 					raise KeyError.new(name)
 				end
 			end
-
+			
 			def []= name, value
 				if self.class.properties.include? name
 					self.send("#{name}=", value)
@@ -109,7 +109,7 @@ module Relaxo
 					raise KeyError.new(name)
 				end
 			end
-
+			
 			def validate(changeset)
 				# Do nothing :)
 			end
