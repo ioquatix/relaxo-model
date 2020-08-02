@@ -46,10 +46,10 @@ module Relaxo
 				
 				def convert_to_primative(document)
 					raise ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
-
+					
 					document.paths.first
 				end
-
+				
 				def convert_from_primative(dataset, path)
 					type, _, _ = path.rpartition('/')
 					
@@ -58,7 +58,7 @@ module Relaxo
 					klass.fetch(dataset, path)
 				end
 			end
-
+			
 			class BelongsTo
 				def self.[] *klasses
 					if klasses.size == 1
@@ -67,17 +67,17 @@ module Relaxo
 						Polymorphic.new(klasses)
 					end
 				end
-			
+				
 				def initialize(klass)
 					@klass = klass
 				end
-
+				
 				def convert_to_primative(document)
 					raise ArgumentError.new("Document must be saved before adding to relationship") unless document.persisted?
 					
 					document.paths.first
 				end
-
+				
 				def convert_from_primative(dataset, path)
 					@klass.fetch(dataset, path)
 				end
@@ -85,7 +85,7 @@ module Relaxo
 			
 			class HasOne < BelongsTo
 			end
-		
+			
 			class HasMany < HasOne
 				def convert_to_primative(documents)
 					documents.each do |document|
@@ -94,7 +94,7 @@ module Relaxo
 					
 					documents.collect{|document| document.paths.first}
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					value.collect{|id| @klass.fetch(dataset, id)}
 				end
@@ -115,13 +115,13 @@ module Relaxo
 				def initialize(klass)
 					@klass = Attribute.new(klass)
 				end
-
+				
 				def convert_to_primative(value)
 					value.collect do |item|
 						@klass.convert_to_primative(item)
 					end
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					value.collect do |item|
 						@klass.convert_from_primative(dataset, item)

@@ -26,18 +26,18 @@ module Relaxo
 			# Handle conversions for standard datatypes.
 			class Attribute
 				@@attributes = {}
-
+				
 				def self.for_class(klass, &block)
 					@@attributes[klass] = Proc.new(&block)
 				end
-
+				
 				def self.[](klass, proc = nil)
 					self.new(klass, &proc)
 				end
-
+				
 				def initialize(klass, &serialization)
 					@klass = klass
-
+					
 					if block_given?
 						self.instance_eval(&serialization)
 					else
@@ -45,7 +45,7 @@ module Relaxo
 					end
 				end
 			end
-		
+			
 			class Serialized
 				def self.[](klass, proc = nil)
 					self.new(klass, &proc)
@@ -63,17 +63,18 @@ module Relaxo
 					@klass.load(value)
 				end
 			end
-		
+			
 			Required = Attribute
-		
+			
 			class Optional
 				def self.[] klass
 					self.new(klass)
 				end
-
+				
 				def initialize(klass)
 					@klass = klass
 				end
+				
 				
 				def convert_to_primative(value)
 					if value.nil? or (value.respond_to?(:empty?) and value.empty?)
@@ -82,7 +83,7 @@ module Relaxo
 						@klass.convert_to_primative(value)
 					end
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					if value.nil? or value.empty?
 						nil
@@ -91,65 +92,65 @@ module Relaxo
 					end
 				end
 			end
-		
+			
 			class Boolean
 			end
-		
+			
 			Attribute.for_class(Boolean) do
 				def convert_to_primative(value)
 					value ? true : false
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					[true, "on", "true"].include?(value)
 				end
 			end
-		
+			
 			Attribute.for_class(Integer) do
 				def convert_to_primative(value)
 					value.to_i
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					value.to_i
 				end
 			end
-		
+			
 			Attribute.for_class(Float) do
 				def convert_to_primative(value)
 					value.to_f
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					value.to_f
 				end
 			end
-
+			
 			Attribute.for_class(Date) do
 				def convert_to_primative(value)
 					value.iso8601
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					Date.parse(value)
 				end
 			end
-
+			
 			Attribute.for_class(DateTime) do
 				def convert_to_primative(value)
 					value.iso8601
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					DateTime.parse(value)
 				end
 			end
-
+			
 			Attribute.for_class(String) do
 				def convert_to_primative(value)
 					value.to_s
 				end
-
+				
 				def convert_from_primative(dataset, value)
 					value.to_s
 				end
