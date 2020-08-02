@@ -2,13 +2,13 @@
 
 Relaxo Model provides a framework for business logic on top of [Relaxo](https://github.com/ioquatix/relaxo), a document data store built on top of git. While it supports some traditional relational style patterns, it is primary focus is to model business processes and logic at the document level.
 
-[![Development Status](https://github.com/ioquatix/relaxo/workflows/Development/badge.svg)](https://github.com/ioquatix/relaxo/actions?workflow=Development)
+[![Development Status](https://github.com/ioquatix/relaxo-model/workflows/Development/badge.svg)](https://github.com/ioquatix/relaxo-model/actions?workflow=Development)
 
 ## Basic Usage
 
 Here is a simple example of a traditional ORM style model:
 
-```ruby
+``` ruby
 require 'relaxo/model'
 
 database = Relaxo.connect("test")
@@ -47,7 +47,7 @@ end
 
 ### Non-UUID Primary Key
 
-```ruby
+``` ruby
 #!/usr/bin/env ruby
 
 gem 'relaxo'
@@ -86,11 +86,11 @@ end
 
 ## Contributing
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+1.  Fork it
+2.  Create your feature branch (`git checkout -b my-new-feature`)
+3.  Commit your changes (`git commit -am 'Add some feature'`)
+4.  Push to the branch (`git push origin my-new-feature`)
+5.  Create new Pull Request
 
 ## License
 
