@@ -75,9 +75,20 @@ module Relaxo
 					@klass = klass
 				end
 				
+				def blank?(value)
+					if value.nil?
+						return true
+					end
+					
+					if value.respond_to?(:empty?) && value.empty?
+						return true
+					end
+					
+					return false
+				end
 				
 				def convert_to_primative(value)
-					if value.nil? or (value.respond_to?(:empty?) and value.empty?)
+					if blank?(value)
 						nil
 					else
 						@klass.convert_to_primative(value)
@@ -85,7 +96,7 @@ module Relaxo
 				end
 				
 				def convert_from_primative(dataset, value)
-					if value.nil? or value.empty?
+					if blank?(value)
 						nil
 					else
 						@klass.convert_from_primative(dataset, value)
